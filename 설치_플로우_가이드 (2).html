@@ -1,0 +1,2403 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>설치 플로우 가이드</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+  :root {
+    --seedn-bg: #EEEDFE; 
+    --seedn-tx: #3C3489; 
+    --seedn-br: #CECBF6;
+    --seedn-primary: #5850EC;
+    
+    --part-bg: #E1F5EE; 
+    --part-tx: #0F6E56; 
+    --part-br: #9FE1CB;
+    --part-primary: #10B981;
+    
+    --warn-bg: #FAEEDA; 
+    --warn-tx: #854F0B; 
+    --warn-br: #FAC775;
+    
+    --ink: #2C2C2A; 
+    --muted: #6F6E68; 
+    --line: #E4E2DA; 
+    --page: #FAFAF7; 
+    --white: #fff;
+    
+    /* Dynamic Theme Defaults (Partner Theme) */
+    --theme-primary: var(--part-primary);
+    --theme-bg: var(--part-bg);
+    --theme-tx: var(--part-tx);
+    --theme-br: var(--part-br);
+  }
+
+  /* Custom Themes */
+  .detail-panel[data-theme="s"] {
+    --theme-primary: var(--seedn-primary);
+    --theme-bg: var(--seedn-bg);
+    --theme-tx: var(--seedn-tx);
+    --theme-br: var(--seedn-br);
+  }
+  .detail-panel[data-theme="p"] {
+    --theme-primary: var(--part-primary);
+    --theme-bg: var(--part-bg);
+    --theme-tx: var(--part-tx);
+    --theme-br: var(--part-br);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  
+  .card.no-detail { cursor: default; }
+  .card.no-detail:hover { transform: none; box-shadow: none; }
+  .card.no-detail .card-head { cursor: default; }
+
+  /* SVG color classes for floor plan diagrams */
+  svg .c-purple rect, svg .c-purple circle { fill: #EEEDFE; stroke: #AFA9EC; }
+  svg .c-purple text { fill: #3C3489; }
+  svg .c-teal rect, svg .c-teal circle { fill: #E1F5EE; stroke: #5DCAA5; }
+  svg .c-teal text { fill: #085041; }
+  svg .c-blue rect, svg .c-blue circle { fill: #E6F1FB; stroke: #85B7EB; }
+  svg .c-blue text { fill: #0C447C; }
+  svg .c-amber rect, svg .c-amber circle { fill: #FAEEDA; stroke: #EF9F27; }
+  svg .c-amber text { fill: #633806; }
+  svg .c-gray rect, svg .c-gray circle { fill: #F1EFE8; stroke: #B4B2A9; }
+  svg .c-gray text { fill: #444441; }
+
+  /* warn 좌측 정렬 */
+
+  /* checkbox-container 텍스트 좌측 정렬 */
+  .checkbox-container { text-align: left; }
+
+  /* Scrollbars styling */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #d1d5db;
+    border-radius: 999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #9ca3af;
+  }
+
+  body {
+    font-family: "Pretendard", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    background: var(--page);
+    color: var(--ink);
+    line-height: 1.6;
+    padding: 32px 16px 80px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .app-container {
+    max-width: 1280px;
+    margin: 0 auto;
+  }
+
+  /* Premium Header with progress bar */
+  .app-header {
+    background: var(--white);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 24px 32px;
+    margin-bottom: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+  }
+  .header-main h1 {
+    font-size: 26px;
+    font-weight: 800;
+    color: var(--ink);
+    letter-spacing: -0.03em;
+  }
+  .header-main p {
+    font-size: 14px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+  .progress-section {
+    flex: 1;
+    max-width: 460px;
+  }
+  .progress-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .progress-label {
+    color: var(--ink);
+  }
+  .progress-percentage {
+    color: var(--part-tx);
+    font-weight: 700;
+  }
+  .progress-bar-container {
+    height: 8px;
+    background-color: #e5e7eb;
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  .progress-bar {
+    height: 100%;
+    width: 0%;
+    background-image: linear-gradient(90deg, var(--part-primary), var(--seedn-primary));
+    border-radius: 999px;
+    transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .btn-reset {
+    background-color: var(--white);
+    border: 1px solid var(--line);
+    padding: 10px 18px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+  }
+  .btn-reset:hover {
+    background-color: #fee2e2;
+    border-color: #fca5a5;
+    color: #b91c1c;
+  }
+
+  .hint {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 12px 18px;
+    font-size: 13px;
+    color: var(--muted);
+    text-align: center;
+    margin-bottom: 24px;
+  }
+
+  /* Two-column layout */
+  .main-layout {
+    display: grid;
+    grid-template-columns: 1.3fr 1fr;
+    gap: 32px;
+    align-items: start;
+  }
+
+  .flowchart-panel {
+    min-width: 0; /* Prevents grid item overflow */
+  }
+
+  /* Flow chart elements styling */
+  .phase {
+    display: flex;
+    align-items: center;
+    margin: 32px 0 16px;
+    width: 100%;
+  }
+  .phase::before, .phase::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--line);
+  }
+  .phase::before { margin-right: 16px; }
+  .phase::after { margin-left: 16px; }
+  .phase span {
+    background: var(--phase-bg);
+    color: var(--phase-tx);
+    font-size: 13px;
+    font-weight: 700;
+    padding: 6px 18px;
+    border-radius: 999px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+  }
+
+  .lanes {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    align-items: start;
+    margin: 14px 0;
+  }
+  .lane-head {
+    font-size: 13.5px;
+    font-weight: 700;
+    text-align: center;
+    padding: 10px;
+    border-radius: 10px;
+    margin-bottom: 14px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.4);
+  }
+  .lane-head.s { background: var(--seedn-bg); color: var(--seedn-tx); }
+  .lane-head.p { background: var(--part-bg); color: var(--part-tx); }
+
+  .flow { display: flex; flex-direction: column; }
+  .flow > .card + .card,
+  .flow > .accordion + .card,
+  .flow > .card + .accordion,
+  .flow > .warn + .card {
+    margin-top: 30px;
+    position: relative;
+  }
+  .flow > .card + .card::before,
+  .flow > .accordion + .card::before,
+  .flow > .card + .accordion::before,
+  .flow > .warn + .card::before {
+    content: "";
+    position: absolute;
+    top: -22px;
+    left: 50%;
+    width: 1.5px;
+    height: 14px;
+    background: var(--part-br);
+    transform: translateX(-50%);
+  }
+  .flow > .card + .card::after,
+  .flow > .accordion + .card::after,
+  .flow > .card + .accordion::after,
+  .flow > .warn + .card::after {
+    content: "";
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    width: 7px;
+    height: 7px;
+    border-right: 1.5px solid var(--part-br);
+    border-bottom: 1.5px solid var(--part-br);
+    transform: translateX(-50%) rotate(45deg);
+  }
+
+  /* Compact Cards (Interactive Triggers on Left Side) */
+  .card {
+    border-radius: 14px;
+    background: var(--part-bg);
+    border: 1.5px solid var(--part-br);
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+  }
+  .card.s { background: var(--seedn-bg); border-color: var(--seedn-br); }
+  
+  .card-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    font-family: inherit;
+    padding: 16px 18px;
+  }
+  .card-title { flex: 1; }
+  .card-title h3 {
+    font-size: 15.5px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+  }
+  .card-title .sub { font-size: 12.5px; color: var(--muted); margin-top: 3px; }
+  .card.s .card-title h3 { color: var(--seedn-tx); } 
+  .card.p .card-title h3 { color: var(--part-tx); }
+
+  /* Card status styles */
+  .card.active {
+    transform: translateY(-2px);
+  }
+  .card.s.active {
+    background: var(--white) !important;
+    border-color: var(--seedn-primary) !important;
+    box-shadow: 0 6px 20px rgba(88, 80, 236, 0.15);
+    outline: 2px solid var(--seedn-primary);
+  }
+  /* 협력사 — 노란색 강조 */
+  .card.p.active,
+  .step.active {
+    background: #FFFBEB !important;
+    border-color: #F59E0B !important;
+    outline: 2px solid #F59E0B;
+    box-shadow: 0 6px 20px rgba(245, 158, 11, 0.15);
+    transform: translateY(-2px);
+  }
+  .card.p.active .card-title h3,
+  .step.active .t {
+    color: #92400E !important;
+  }
+  .card.p.active .sub,
+  .step.active .num {
+    color: #B45309 !important;
+  }
+
+  .handoff { font-size: 12.5px; color: var(--muted); text-align: center; margin: 8px 0; }
+  .handoff i { font-style: normal; color: var(--part-tx); font-weight: 600; }
+  .warn {
+    background: var(--warn-bg);
+    border: 1px solid var(--warn-br);
+    color: var(--warn-tx);
+    border-radius: 12px;
+    padding: 12px;
+    font-size: 13.5px;
+    font-weight: 600;
+    text-align: left;
+  }
+
+  /* Accordion installations */
+  .accordion {
+    border: 1.5px solid var(--part-br);
+    border-radius: 14px;
+    background: var(--white);
+    overflow: hidden;
+  }
+  .accordion > .acc-title {
+    background: var(--part-bg);
+    color: var(--part-tx);
+    font-weight: 700;
+    font-size: 15px;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--part-br);
+  }
+  .step {
+    border-top: 1px solid var(--line);
+    background: var(--white);
+    transition: all 0.2s;
+  }
+  .step:first-of-type { border-top: none; }
+  
+  .step-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    padding: 14px 18px;
+    font-family: inherit;
+    font-size: 14.5px;
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .step-head:hover { background: #f9fafb; }
+  
+  .num {
+    flex: none;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--part-bg);
+    color: var(--part-tx);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+  }
+  .step-head .t {
+    flex: 1;
+    display: flex;
+    align-items: center;
+  }
+
+  .step.active {
+    background-color: #f9fafb;
+  }
+  .step.active .step-head {
+    color: var(--part-tx);
+    font-weight: 700;
+  }
+
+  /* Hide raw body templates in Flow Map */
+  .flowchart-panel .card-body,
+  .flowchart-panel .step-body,
+  .flowchart-panel .chev {
+    display: none !important;
+  }
+
+  /* Right Panel / Desktop Sticky Sidebar */
+  .detail-panel {
+    position: sticky;
+    top: 32px;
+    background: var(--white);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 28px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.03);
+    display: flex;
+    flex-direction: column;
+    max-height: calc(100vh - 64px);
+    overflow-y: auto;
+  }
+
+  .detail-header {
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 20px;
+    margin-bottom: 24px;
+  }
+  .detail-step-badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 6px;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+  .detail-step-badge.s { background: var(--seedn-bg); color: var(--seedn-tx); }
+  .detail-step-badge.p { background: var(--part-bg); color: var(--part-tx); }
+
+  .detail-header h2 {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--ink);
+    line-height: 1.3;
+  }
+  .detail-subtitle {
+    font-size: 13.5px;
+    color: var(--muted);
+    margin-top: 6px;
+    text-align: left;
+  }
+
+  /* Active step progress indicator inside detail */
+  .step-progress-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 16px;
+  }
+  .step-progress-bar-bg {
+    flex: 1;
+    height: 6px;
+    background-color: #f3f4f6;
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  .step-progress-bar {
+    height: 100%;
+    width: 0%;
+    background-color: var(--theme-primary);
+    border-radius: 999px;
+    transition: width 0.3s ease;
+  }
+  .step-progress-text {
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--theme-tx);
+    white-space: nowrap;
+  }
+
+  /* Empty state */
+  .empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--muted);
+  }
+  .empty-state .icon {
+    font-size: 32px;
+    display: block;
+    margin-bottom: 12px;
+  }
+
+  /* step-body, card-body 텍스트 좌측 정렬 */
+  .step-body,
+  .card-body {
+    text-align: left;
+    word-break: keep-all;
+    overflow-wrap: break-word;
+  }
+  .step-body ul,
+  .card-body ul,
+  .step-body li,
+  .card-body li,
+  .step-body p,
+  .card-body p {
+    text-align: left;
+    word-break: keep-all;
+    overflow-wrap: break-word;
+  }
+
+  /* Detailed contents styling inside panel */
+  .detail-body {
+    flex: 1;
+    overflow-y: auto;
+    font-size: 14px;
+    text-align: left;
+  }
+  .ph {
+    font-size: 12.5px;
+    color: #b26b12;
+    background: #fff6e6;
+    border: 1px dashed #f0c77a;
+    border-radius: 8px;
+    padding: 6px 12px;
+    display: block;
+    margin-top: 20px;
+    margin-bottom: 16px;
+    font-weight: 500;
+    text-align: left;
+    word-break: keep-all;
+    overflow-wrap: break-word;
+  }
+  .detail-body > .ph:first-child,
+  .step-body > .ph:first-child {
+    margin-top: 0;
+  }
+
+  /* Custom checklist styling */
+  .detail-body ul {
+    list-style: none;
+    padding-left: 0;
+    margin-bottom: 20px;
+  }
+  .detail-body li {
+    margin-bottom: 8px;
+  }
+
+  .checkbox-container {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    cursor: pointer;
+    font-size: 14.5px;
+    line-height: 1.5;
+    color: var(--ink);
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: 1px solid #f3f4f6;
+    background-color: #fcfcfc;
+    transition: all 0.2s ease;
+    user-select: none;
+    text-align: left;
+    word-break: keep-all;
+    overflow-wrap: break-word;
+  }
+  .checkbox-container:hover {
+    background-color: #f3f4f6;
+    border-color: #e5e7eb;
+  }
+  .checkbox-container input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+  }
+  .custom-checkbox {
+    position: relative;
+    height: 20px;
+    width: 20px;
+    background-color: #fff;
+    border: 2px solid #d1d5db;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .checkbox-container:hover input ~ .custom-checkbox {
+    border-color: var(--theme-primary);
+  }
+  .checkbox-container input:checked ~ .custom-checkbox {
+    background-color: var(--theme-primary);
+    border-color: var(--theme-primary);
+  }
+  .custom-checkbox::after {
+    content: "";
+    position: absolute;
+    display: none;
+    left: 6px;
+    top: 2.5px;
+    width: 4px;
+    height: 8px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+  }
+  .checkbox-container input:checked ~ .custom-checkbox::after {
+    display: block;
+  }
+  .checkbox-container input:checked ~ .checkbox-text {
+    color: var(--muted);
+    text-decoration: line-through;
+  }
+  .checkbox-text {
+    flex: 1;
+    text-align: left;
+    word-break: keep-all;
+    overflow-wrap: break-word;
+    line-height: 1.6;
+  }
+
+  .no-checklist-default {
+    margin-top: 16px;
+  }
+
+  .att {
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--muted);
+    margin: 20px 0 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 12px;
+  }
+  .media {
+    position: relative;
+    aspect-ratio: 4/3;
+    border-radius: 10px;
+    overflow: hidden;
+    background: #f3f3ef;
+    border: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+  }
+  .media:hover {
+    transform: scale(1.02);
+    border-color: var(--theme-primary);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+  }
+  .media img, .media video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .media .placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    color: #b6b5ae;
+    font-size: 11px;
+    text-align: center;
+    padding: 8px;
+  }
+  .media .placeholder .icon { font-size: 24px; line-height: 1; }
+  .badge {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 6px;
+    background: rgba(255,255,255,0.92);
+    color: var(--ink);
+    border: 1px solid var(--line);
+    z-index: 1;
+  }
+  .play {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(44, 44, 42, 0.85);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    pointer-events: none;
+  }
+
+  /* Step detail footer buttons */
+  .detail-footer {
+    border-top: 1px solid var(--line);
+    padding-top: 20px;
+    margin-top: 24px;
+    display: flex;
+    gap: 12px;
+  }
+  .btn-nav {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 18px;
+    border-radius: 10px;
+    font-size: 13.5px;
+    font-weight: 700;
+    cursor: pointer;
+    border: 1px solid var(--line);
+    background-color: var(--white);
+    color: var(--ink);
+    transition: all 0.2s ease;
+  }
+  .btn-nav:hover:not(:disabled) {
+    background-color: #f9fafb;
+    border-color: #d1d5db;
+  }
+  .btn-nav:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+  .btn-nav.primary {
+    background-color: var(--theme-primary);
+    color: var(--white);
+    border: none;
+  }
+  .btn-nav.primary:hover:not(:disabled) {
+    filter: brightness(0.92);
+  }
+
+  /* Mobile Bottom Sheet Backdrop */
+  .backdrop { display: none; }
+
+  /* Drag handle container for bottom sheet */
+  .bottom-sheet-handle-container { display: none; }
+
+  /* Lightbox for full screen media */
+  .lightbox {
+    position: fixed;
+    inset: 0;
+    background: rgba(20, 20, 19, 0.95);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+    padding: 20px;
+  }
+  .lightbox.open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .lightbox-content {
+    position: relative;
+    max-width: 90%;
+    max-height: 85vh;
+  }
+  .lightbox-content img, .lightbox-content video {
+    max-width: 100%;
+    max-height: 80vh;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+    display: block;
+  }
+  .lightbox-close {
+    position: absolute;
+    top: -45px;
+    right: 0;
+    background: none;
+    border: none;
+    color: var(--white);
+    font-size: 36px;
+    cursor: pointer;
+    line-height: 1;
+  }
+  .lightbox-placeholder {
+    background: #2c2c2a;
+    color: #fff;
+    padding: 40px;
+    border-radius: 16px;
+    text-align: center;
+    border: 1px solid #444;
+  }
+  .lightbox-placeholder .placeholder-icon {
+    font-size: 48px;
+    margin-bottom: 12px;
+  }
+  .lightbox-placeholder .placeholder-text {
+    font-size: 16px;
+    font-weight: 700;
+    color: #e4e2da;
+  }
+  .lightbox-placeholder .placeholder-sub {
+    font-size: 13px;
+    color: #888;
+    margin-top: 8px;
+  }
+
+  /* Responsive breakdown */
+  @media (max-width: 767px) {
+    body { padding: 16px 12px 64px; }
+    
+    .app-header {
+      flex-direction: column;
+      align-items: stretch;
+      padding: 20px;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    .progress-section { max-width: 100%; }
+    .btn-reset { justify-content: center; }
+
+    .main-layout {
+      grid-template-columns: 1fr;
+      gap: 20px;
+    }
+
+    .lanes {
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+    .lane.s.empty { display: none; }
+
+    /* 모바일: 우측 패널을 플로우 아래 인라인으로 표시 */
+    .detail-panel {
+      position: sticky;
+      top: 12px;
+      height: auto;
+      max-height: none;
+      border-radius: var(--border-radius, 16px);
+      padding: 20px;
+      transform: none;
+      transition: none;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+      display: flex;
+      flex-direction: column;
+    }
+    .detail-panel.show-sheet {
+      transform: none;
+    }
+
+    .bottom-sheet-handle-container { display: none; }
+
+    .detail-header {
+      padding: 0 0 16px;
+      margin-bottom: 16px;
+    }
+    .detail-body {
+      padding: 0;
+    }
+    .detail-footer {
+      padding: 16px 0 0;
+      margin-top: 0;
+      background-color: #fff;
+      border-top: 1px solid var(--line);
+    }
+
+    .backdrop { display: none !important; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+  }
+</style>
+</head>
+<body>
+<div class="app-container">
+  
+  <header class="app-header">
+    <div class="header-main">
+      <h1>설치 플로우 가이드</h1>
+      <p>씨드앤 · 협력사 설치 진행 전체 흐름</p>
+    </div>
+    <div class="progress-section">
+      <div class="progress-info">
+        <span class="progress-label">전체 진행률</span>
+        <span class="progress-percentage" id="overall-progress-text">0% (0/15 단계 완료)</span>
+      </div>
+      <div class="progress-bar-container">
+        <div class="progress-bar" id="overall-progress-bar"></div>
+      </div>
+    </div>
+    <button class="btn-reset" onclick="resetAllProgress()">
+      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+      <span>진행 초기화</span>
+    </button>
+  </header>
+
+  <div class="hint">
+    💡 왼쪽 플로우에서 각 단계 카드를 누르면 우측에서 상세 작업 체크리스트와 가이드를 확인할 수 있습니다.
+  </div>
+
+  <div class="main-layout">
+    
+    <!-- LEFT PANEL: FLOW MAP -->
+    <div class="flowchart-panel">
+      
+      <!-- ===== 설치 건 인입 ===== -->
+      <div class="phase"><span>설치 건 인입</span></div>
+      <div class="lanes">
+        <div class="lane s">
+          <div class="lane-head s">씨드앤</div>
+          <div class="flow">
+            <!-- 설치 건 확인 -->
+            <div class="card exp s no-detail" id="c0">
+              <button class="card-head" style="cursor:default" onclick="return false">
+                <div class="card-title">
+                  <h3>설치 건 확인</h3>
+                  <div class="sub">파트너스앱 Task 등록</div>
+                </div>
+              </button>
+              <div class="card-body">
+                <span class="ph">절차 가이드</span>
+                <ul>
+                  <li>파트너스앱에 등록된 신규 설치 Task 정보를 확인합니다.</li>
+                  <li>등록된 고객 정보, 현장 주소, 요청 사항을 검토합니다.</li>
+                </ul>
+                <div class="att">📎 첨부 자료</div>
+                <div class="grid">
+                  <div class="media"><span class="badge">사진</span><div class="placeholder"><span class="icon">🖼</span>assets/check-1.jpg</div></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 출동 정보 확인 -->
+            <div class="card exp s no-detail" id="c4">
+              <button class="card-head" style="cursor:default" onclick="return false">
+                <div class="card-title">
+                  <h3>출동 정보 확인</h3>
+                  <div class="sub">일시 · 기사 배정 확인</div>
+                </div>
+              </button>
+              <div class="card-body">
+                <span class="ph">절차 가이드</span>
+                <ul>
+                  <li>파트너 등록 화면에서 출동 예정 일시가 알맞게 설정되었는지 확인합니다.</li>
+                  <li>배정 기사가 지정된 현장의 자격 기준에 부합하는지 최종 승인합니다.</li>
+                </ul>
+                <div class="att">📎 첨부 자료</div>
+                <div class="grid">
+                  <div class="media"><span class="badge">사진</span><div class="placeholder"><span class="icon">🖼</span>assets/dispatch-1.jpg</div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="lane p">
+          <div class="lane-head p">협력사</div>
+          <div class="flow">
+            <!-- 담당 매니저 Task 확인 -->
+            <div class="card exp p" id="c1">
+              <button class="card-head" onclick="selectStep('c1')">
+                <div class="card-title">
+                  <h3>조율이 필요한 작업 확인</h3>
+                  <div class="sub">각 지사 담당자</div>
+                </div>
+              </button>
+              <div class="card-body">
+                <span class="ph">절차 가이드</span>
+                <ul>
+                  <li>파트너스앱에서 새롭게 등록된 신규 작업건을 확인합니다.</li>
+                </ul>
+                <div class="att">📎 첨부 자료</div>
+                <div class="grid">
+                  <div class="media"><span class="badge">사진</span><div class="placeholder"><span class="icon">🖼</span>assets/manager-1.jpg</div></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 고객 방문 일정 협의 -->
+            <div class="card exp p" id="c2">
+              <button class="card-head" onclick="selectStep('c2')">
+                <div class="card-title">
+                  <h3>고객 방문 일정 협의</h3>
+                  <div class="sub">고객과 방문 일시 조율 · 확정</div>
+                </div>
+              </button>
+              <div class="card-body">
+                <span class="ph">절차 가이드</span>
+                <ul>
+                  <li>담당 매니저는 현장 연락처를 확인하여 고객에게 전화를 연결합니다.</li>
+                  <li>방문 목적을 안내하고 상호 간에 조율 가능한 방문 일시를 협의하여 확정합니다.</li>
+                </ul>
+                <div class="att">📎 첨부 자료</div>
+                <div class="grid">
+                  <div class="media"><span class="badge">사진</span><div class="placeholder"><span class="icon">🖼</span>assets/schedule-1.jpg</div></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 출동 예정 등록 -->
+            <div class="card exp p" id="c3">
+              <button class="card-head" onclick="selectStep('c3')">
+                <div class="card-title">
+                  <h3>출동 정보 등록</h3>
+                  <div class="sub">예정 일시 · 배정 기사 등록</div>
+                </div>
+              </button>
+              <div class="card-body">
+                <span class="ph">절차 가이드</span>
+                <ul>
+                  <li>파트너스앱 내의 조율이 필요한 작업으로 이동합니다.</li>
+                  <li>조율이 필요한 작업의 매장명을 누릅니다.</li>
+                  <li>오른쪽 상단의 수정 버튼을 누릅니다.</li>
+                  <li>배정 탭으로 이동합니다.</li>
+                  <li>배정 기사를 등록합니다.</li>
+                  <li>예정 일자와 예정 시각을 등록한 후 저장을 누릅니다.</li>
+                </ul>
+                <div class="warn">⚠ 배정된 기사만 설치 장소 주소를 확인할 수 있습니다.</div>
+                <div class="att">📎 첨부 자료</div>
+                <div class="grid">
+                  <div class="media"><span class="badge">사진</span><div class="placeholder"><span class="icon">🖼</span>assets/register-1.jpg</div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="handoff"><i>↕</i> 씨드앤 · 협력사 간 파트너스앱으로 인입 / 출동 정보 공유</div>
+
+      <!-- ===== 설치 당일 ===== -->
+      <div class="phase"><span>설치 당일</span></div>
+      <div class="lanes">
+        <div class="lane s empty"></div>
+        <div class="lane p">
+          <div class="flow">
+            <!-- 설치 시작 -->
+            <div class="card exp p" id="c5">
+              <button class="card-head" onclick="selectStep('c5')">
+                <div class="card-title">
+                  <h3>설치 시작</h3>
+                  <div class="sub">현장 도착 후 처리</div>
+                </div>
+              </button>
+              <div class="card-body">
+                <span class="ph">절차 가이드</span>
+                <ul>
+                  <li>현장 근처 및 목적지 도착 후 파트너스앱을 켭니다.</li>
+                  <li>정확한 위치를 다시 확인하고 앱 화면 하단의 [설치 시작] 버튼을 누릅니다.</li>
+                </ul>
+                <div class="att">📎 첨부 자료</div>
+                <div class="grid">
+                  <div class="media"><span class="badge">사진</span><div class="placeholder"><span class="icon">🖼</span>assets/start-1.jpg</div></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 설치 작업 -->
+            <div class="accordion">
+              <div class="acc-title">설치 작업</div>
+
+              <!-- 1. 기기 구성 -->
+              <div class="step" id="step0">
+                <button class="step-head" onclick="selectStep('step0')">
+                  <span class="num">1</span>
+                  <span class="t">기기 구성</span>
+                </button>
+                <div class="step-body">
+                  <span class="ph">작업 절차</span>
+                  <ul>
+                    <li>설치 전, 허브별로 등록할 컨트롤러와 센서의 MAC 주소를 미리 확인하여 구성표에 기록해 둡니다.</li>
+                  </ul>
+                  <div class="att">📎 첨부 자료</div>
+                  <div class="grid">
+                    <div class="media"><span class="badge">사진</span><div class="placeholder"><span class="icon">🖼</span>assets/matching-1.jpg</div></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 2. 기기 설치 -->
+              <div class="step" id="step0b">
+                <button class="step-head" onclick="selectStep('step0b')">
+                  <span class="num">2</span>
+                  <span class="t">기기 설치</span>
+                </button>
+                <div class="step-body">
+
+                  <span class="ph">① 컨트롤러 설치</span>
+                  <ul>
+                    <li>컨트롤러에 건전지를 삽입합니다.</li>
+                    <li>에어컨 제조사에 맞는 프로토콜을 선택합니다.<br>
+                      · 삼성: C　/ LG: A　/ 캐리어: 프로토콜을 하나씩 모두 시도하여 제어 가능한 항목을 확인합니다.</li>
+                    <li>컨트롤러를 에어컨 가까이 가져가 블루투스 기반으로 제어 테스트를 진행합니다. (이 단계에서는 허브 등록 없이 단독으로 테스트합니다.)</li>
+                    <li>제어가 정상 확인되면, 아래 부착 기준에 따라 IR 수신부 방향으로 컨트롤러를 부착합니다.
+                      <ul>
+                        <li>1. IR 수신부와 평행이 되도록 설치합니다.</li>
+                        <li>2. 필터 위에는 설치하지 않습니다.</li>
+                        <li>3. 실리콘을 적당량 도포합니다.</li>
+                        <li>4. 낙하되지 않도록 견고하게 고정합니다.</li>
+                      </ul>
+                    </li>
+                    <li>부착 완료 후 제어 테스트를 한 번 더 진행하여 정상 동작을 최종 확인합니다.</li>
+                  </ul>
+                  <div class="att">📎 컨트롤러 설치 사진</div>
+                  <div class="grid">
+                    <div class="media"><span class="badge">사진</span><div class="placeholder"><span class="icon">🖼</span>assets/ctrl-1.jpg</div></div>
+                    <div class="media"><span class="badge">사진</span><div class="placeholder"><span class="icon">🖼</span>assets/ctrl-2.jpg</div></div>
+                    <div class="media"><span class="badge">사진</span><div class="placeholder"><span class="icon">🖼</span>assets/ctrl-3.jpg</div></div>
+                  </div>
+
+                  <span class="ph">② 허브 설치</span>
+                  <ul>
+                    <li>등록 예정인 컨트롤러 및 센서와의 수신 감도(dBm)를 확인하여 신호가 양호한 위치를 선정합니다.</li>
+                    <li>아래 설치 기준을 준수하여 허브를 고정합니다.
+                      <ul>
+                        <li>1. 통신이 원활한 개방된 위치에 설치합니다. (서랍 안 등 밀폐 공간 설치 불가)</li>
+                        <li>2. 흔들리지 않도록 견고하게 고정합니다.</li>
+                      </ul>
+                    </li>
+                  </ul>
+                  <div class="att">📎 허브 설치 사진</div>
+                  <div class="grid">
+                    <div class="media"><span class="badge">사진</span><div class="placeholder"><span class="icon">🖼</span>assets/hub-1.jpg</div></div>
+                    <div class="media"><span class="badge">사진</span><div class="placeholder"><span class="icon">🖼</span>assets/hub-2.jpg</div></div>
+                    <div class="media"><span class="badge">사진</span><div class="placeholder"><span class="icon">🖼</span>assets/hub-3.jpg</div></div>
+                  </div>
+
+                  <span class="ph">③ 센서 설치</span>
+                  <ul>
+                    <li>센서에 건전지를 삽입합니다.</li>
+                    <li>아래 설치 기준을 준수하여 센서를 부착합니다.
+                      <ul>
+                        <li>매칭 에어컨 부근에 설치합니다.</li>
+                        <li>1. 외기 영향, 에어컨 직풍, 철판, 발열기기 부근은 피합니다.</li>
+                        <li>2. 센싱이 원활하도록 개방된 위치에 설치합니다.</li>
+                        <li>3. 정렬을 맞춰 미관상 보기 좋게 설치합니다.</li>
+                        <li>4. 좌식 생활 공간: 바닥에서 약 1.2m 높이에 설치합니다.</li>
+                        <li>5. 입식 생활 공간: 바닥에서 약 1.5m 높이에 설치합니다.</li>
+                      </ul>
+                    </li>
+                  </ul>
+                  <div class="att">📎 센서 설치 사진</div>
+                  <div class="grid">
+                    <div class="media"><span class="badge">사진</span><div class="placeholder"><span class="icon">🖼</span>assets/sensor-1.jpg</div></div>
+                    <div class="media"><span class="badge">사진</span><div class="placeholder"><span class="icon">🖼</span>assets/sensor-2.jpg</div></div>
+                    <div class="media"><span class="badge">사진</span><div class="placeholder"><span class="icon">🖼</span>assets/sensor-3.jpg</div></div>
+                  </div>
+
+                </div>
+              </div>
+
+              <!-- 3. 기기 매칭 -->
+              <div class="step" id="step0d">
+                <button class="step-head" onclick="selectStep('step0d')">
+                  <span class="num">3</span>
+                  <span class="t">기기 매칭</span>
+                </button>
+                <div class="step-body">
+
+                  <span class="ph">허브 Wi-Fi 등록</span>
+                  <ul>
+                    <li>앱에서 허브를 선택한 후 Wi-Fi 등록 화면으로 이동합니다.</li>
+                    <li>사용할 Wi-Fi 네트워크를 선택하고 비밀번호를 입력합니다.
+                      <ul>
+                        <li><strong>Galaxy(안드로이드)</strong>: 등록 가능한 Wi-Fi 목록이 자동으로 표시됩니다. 목록에서 해당 네트워크를 선택합니다.</li>
+                        <li><strong>iPhone(iOS)</strong>: 등록하려는 Wi-Fi에 기기가 미리 연결되어 있어야 합니다. 연결 후 앱에서 해당 네트워크를 선택합니다.</li>
+                      </ul>
+                    </li>
+                    <li>서비스를 선택하고 등록을 완료하면 허브가 해당 Wi-Fi와 통신을 시작합니다.</li>
+                  </ul>
+                  <div class="att">📎 Wi-Fi 등록 사진</div>
+                  <div class="grid">
+                    <div class="media"><span class="badge">사진</span><div class="placeholder"><span class="icon">🖼</span>assets/wifi-1.jpg</div></div>
+                    <div class="media"><span class="badge">사진</span><div class="placeholder"><span class="icon">🖼</span>assets/wifi-2.jpg</div></div>
+                    <div class="media"><span class="badge">사진</span><div class="placeholder"><span class="icon">🖼</span>assets/wifi-3.jpg</div></div>
+                  </div>
+
+                  <span class="ph">컨트롤러 · 센서 추가</span>
+                  <ul>
+                    <li>등록된 허브를 선택한 후 [기기 추가]를 누릅니다.</li>
+                    <li>해당 허브에 등록할 컨트롤러와 센서를 목록에서 찾아 추가합니다.</li>
+                  </ul>
+                  <div class="att">📎 기기 추가 사진</div>
+                  <div class="grid">
+                    <div class="media"><span class="badge">사진</span><div class="placeholder"><span class="icon">🖼</span>assets/reg-1.jpg</div></div>
+                    <div class="media"><span class="badge">사진</span><div class="placeholder"><span class="icon">🖼</span>assets/reg-2.jpg</div></div>
+                    <div class="media"><span class="badge">사진</span><div class="placeholder"><span class="icon">🖼</span>assets/reg-3.jpg</div></div>
+                  </div>
+
+                  <span class="ph">선택 사항 — 씨드앤 공유기 추가 설치</span>
+                  <ul>
+                    <li>고객사 공유기를 사용하는 경우 별도 설치가 필요하지 않습니다.</li>
+                    <li>씨드앤 공유기를 추가 설치하는 경우 아래 매뉴얼 사진을 참고하여 진행합니다.
+                      <ul>
+                        <li>1. 원공유기와 유선으로 연결합니다. (무선 연결 시 사유 공유 필수)</li>
+                        <li>2. 공유기 스티커를 부착합니다.</li>
+                        <li>3. 공유기 설정을 모두 완료합니다.</li>
+                        <li>4. 통신이 정상적으로 이루어지는지 확인합니다.</li>
+                      </ul>
+                    </li>
+                  </ul>
+                  <div class="att">📎 공유기 설치 매뉴얼</div>
+                  <div class="grid">
+                    <div class="media"><span class="badge">사진</span><div class="placeholder"><span class="icon">🖼</span>assets/router-1.jpg</div></div>
+                    <div class="media"><span class="badge">사진</span><div class="placeholder"><span class="icon">🖼</span>assets/router-2.jpg</div></div>
+                    <div class="media"><span class="badge">사진</span><div class="placeholder"><span class="icon">🖼</span>assets/router-3.jpg</div></div>
+                    <div class="media"><span class="badge">사진</span><div class="placeholder"><span class="icon">🖼</span>assets/router-4.jpg</div></div>
+                    <div class="media"><span class="badge">사진</span><div class="placeholder"><span class="icon">🖼</span>assets/router-5.jpg</div></div>
+                  </div>
+
+                </div>
+              </div>
+
+              <!-- 4. 공간 등록 -->
+              <div class="step" id="step0c">
+                <button class="step-head" onclick="selectStep('step0c')">
+                  <span class="num">4</span>
+                  <span class="t">공간 등록</span>
+                </button>
+                <div class="step-body">
+                  <span class="ph">작업 절차</span>
+                  <ul>
+                    <li>파트너스앱에서 현재 작업 중인 장소의 [장소 보기]를 클릭합니다.</li>
+                    <li>오른쪽 하단의 [+] 버튼을 누른 후 [공간 추가/수정]을 선택합니다.</li>
+                    <li>현장의 실제 층을 선택하고 공간 이름을 입력하여 등록합니다.</li>
+                  </ul>
+                  <div class="warn">⚠ 아래의 경우 공간을 별도로 분리해주세요<br><br>1. 실제 공간이 분리되어 있음 (문·벽 등으로 별도로 구분)<br>2. 각 공간의 용도가 다름</div>
+                  <div class="att">📎 첨부 자료</div>
+                  <div class="grid">
+                    <div class="media"><span class="badge">사진</span><div class="placeholder"><span class="icon">🖼</span>assets/space-1.jpg</div></div>
+                    <div class="media"><span class="badge">사진</span><div class="placeholder"><span class="icon">🖼</span>assets/space-2.jpg</div></div>
+                    <div class="media"><span class="badge">사진</span><div class="placeholder"><span class="icon">🖼</span>assets/space-3.jpg</div></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 5. 기기 등록 -->
+              <div class="step" id="stepDevReg">
+                <button class="step-head" onclick="selectStep('stepDevReg')">
+                  <span class="num">5</span>
+                  <span class="t">기기 등록</span>
+                </button>
+                <div class="step-body">
+                  <span class="ph">작업 절차</span>
+                  <ul>
+                    <li>파트너스앱에서 현재 작업 중인 장소의 [장소 보기]를 클릭합니다.</li>
+                    <li>오른쪽 하단의 [+] 버튼을 누른 후 [기기 추가/수정]을 선택합니다.</li>
+                    <li>각 공간별로 설치한 기기의 MAC 주소를 입력하여 추가한 후 저장합니다.</li>
+                  </ul>
+                  <div class="att">📎 첨부 자료</div>
+                  <div class="grid">
+                    <div class="media"><span class="badge">사진</span><div class="placeholder"><span class="icon">🖼</span>assets/devreg-1.jpg</div></div>
+                    <div class="media"><span class="badge">사진</span><div class="placeholder"><span class="icon">🖼</span>assets/devreg-2.jpg</div></div>
+                    <div class="media"><span class="badge">사진</span><div class="placeholder"><span class="icon">🖼</span>assets/devreg-3.jpg</div></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 6. 기기 사진 촬영 -->
+              <!-- 6. 설치 확인 -->
+              <div class="step" id="step1">
+                <button class="step-head" onclick="selectStep('step1')">
+                  <span class="num">6</span>
+                  <span class="t">설치 확인</span>
+                </button>
+                <div class="step-body">
+
+                  <span class="ph">사전 준비</span>
+                  <ul>
+                    <li>설치된 에어컨 전체가 종료된 상태인지 확인한 후 진행합니다.</li>
+                  </ul>
+
+                  <span class="ph">① 컨트롤러 제어 테스트 및 사진 촬영</span>
+                  <ul>
+                    <li>파트너스앱 [장소 보기]에서 등록한 컨트롤러(에어컨)를 하나씩 선택합니다.</li>
+                    <li>냉방·송풍·난방 등 최소 3회 이상, 다양한 온도와 풍량 조합으로 제어 테스트를 진행합니다.</li>
+                    <li>선택한 기기와 실제 가동되는 에어컨이 일치하는지 확인합니다.</li>
+                    <li>기기 일치가 확인되면, 에어컨 명 옆 [>] 표시를 눌러 오른쪽 상단 카메라 표시로 실시간 사진을 촬영합니다.</li>
+                  </ul>
+                  <div class="warn">⚠ 미리 촬영해 둔 갤러리 사진 업로드는 지양합니다. 제어 테스트 후 기기와 에어컨 매칭이 확인된 상태에서 실시간으로 촬영·업로드를 권장합니다. 사전 촬영 시 기기와 실제 설치된 에어컨이 불일치할 수 있습니다.</div>
+                  <div class="att">📎 컨트롤러 사진 촬영 가이드</div>
+                  <ul>
+                    <li>에어컨 위치와 설치 각도 등이 확인 가능하도록 촬영합니다.</li>
+                    <li>촬영 기기의 MAC 주소와 실제 설치 기기가 일치하는지 확인합니다.</li>
+                  </ul>
+                  <div class="grid">
+                    <div class="media"><span class="badge">사진</span><div class="placeholder"><span class="icon">🖼</span>assets/ctrl-photo-1.jpg</div></div>
+                    <div class="media"><span class="badge">사진</span><div class="placeholder"><span class="icon">🖼</span>assets/ctrl-photo-2.jpg</div></div>
+                    <div class="media"><span class="badge">사진</span><div class="placeholder"><span class="icon">🖼</span>assets/ctrl-photo-3.jpg</div></div>
+                  </div>
+
+                  <span class="ph">② 허브 사진 촬영</span>
+                  <ul>
+                    <li>허브의 MAC 주소와 촬영 기기가 일치하는지 확인합니다.</li>
+                  </ul>
+                  <div class="att">📎 허브 사진 촬영 가이드</div>
+                  <ul>
+                    <li>설치 위치를 식별할 수 있도록 기기와 주변 공간이 함께 나오도록 촬영합니다.</li>
+                  </ul>
+                  <div class="grid">
+                    <div class="media"><span class="badge">사진</span><div class="placeholder"><span class="icon">🖼</span>assets/hub-photo-1.jpg</div></div>
+                    <div class="media"><span class="badge">사진</span><div class="placeholder"><span class="icon">🖼</span>assets/hub-photo-2.jpg</div></div>
+                    <div class="media"><span class="badge">사진</span><div class="placeholder"><span class="icon">🖼</span>assets/hub-photo-3.jpg</div></div>
+                  </div>
+
+                  <span class="ph">③ 센서 사진 촬영</span>
+                  <ul>
+                    <li>센서의 MAC 주소와 촬영 기기가 일치하는지 확인합니다.</li>
+                  </ul>
+                  <div class="att">📎 센서 사진 촬영 가이드</div>
+                  <ul>
+                    <li>매칭된 컨트롤러와 함께 나오도록 촬영합니다.</li>
+                  </ul>
+                  <div class="grid">
+                    <div class="media"><span class="badge">사진</span><div class="placeholder"><span class="icon">🖼</span>assets/sensor-photo-1.jpg</div></div>
+                    <div class="media"><span class="badge">사진</span><div class="placeholder"><span class="icon">🖼</span>assets/sensor-photo-2.jpg</div></div>
+                    <div class="media"><span class="badge">사진</span><div class="placeholder"><span class="icon">🖼</span>assets/sensor-photo-3.jpg</div></div>
+                  </div>
+
+                  <span class="ph">④ 공유기 사진 촬영 (설치 시)</span>
+                  <ul>
+                    <li>씨드앤 공유기를 설치한 경우에만 진행합니다.</li>
+                  </ul>
+                  <div class="att">📎 공유기 사진 촬영 가이드</div>
+                  <ul>
+                    <li>공유기 스티커가 부착되어 있는지 확인합니다.</li>
+                    <li>원공유기와 연결된 상태가 잘 보이도록 촬영합니다.</li>
+                  </ul>
+                  <div class="grid">
+                    <div class="media"><span class="badge">사진</span><div class="placeholder"><span class="icon">🖼</span>assets/router-photo-1.jpg</div></div>
+                    <div class="media"><span class="badge">사진</span><div class="placeholder"><span class="icon">🖼</span>assets/router-photo-2.jpg</div></div>
+                    <div class="media"><span class="badge">사진</span><div class="placeholder"><span class="icon">🖼</span>assets/router-photo-3.jpg</div></div>
+                  </div>
+
+                </div>
+              </div>
+
+              <!-- 7. 도면 작성 및 등록 -->
+              <div class="step" id="step4">
+                <button class="step-head" onclick="selectStep('step4')">
+                  <span class="num">7</span>
+                  <span class="t">도면 작성 및 등록</span>
+                </button>
+                <div class="step-body">
+
+                  <span class="ph">도면 작성 예시</span>
+                  <div style="border:0.5px solid var(--color-border-secondary);border-radius:10px;overflow:hidden;margin-bottom:12px">
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0">
+                      <div style="border-right:0.5px solid var(--color-border-tertiary)">
+                        <div style="padding:6px 10px;background:var(--color-background-secondary);border-bottom:0.5px solid var(--color-border-tertiary);display:flex;align-items:center;justify-content:space-between">
+                          <span style="font-size:11px;font-weight:500;color:var(--color-text-primary)">1F</span>
+                          <span style="font-size:10px;color:var(--color-text-tertiary)">1H / 1C~4C</span>
+                        </div>
+                        <svg width="100%" viewBox="0 0 320 280" role="img">
+                          <title>1F 도면 예시</title><desc>1층 도면</desc>
+                          <defs>
+                            <pattern id="fp-h1" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+                              <line x1="0" y1="0" x2="0" y2="5" stroke="var(--color-border-secondary)" stroke-width="0.8"/>
+                            </pattern>
+                          </defs>
+                          <rect x="10" y="10" width="300" height="260" rx="3" fill="none" stroke="var(--color-border-secondary)" stroke-width="0.5"/>
+                          <line x1="10" y1="160" x2="310" y2="160" stroke="var(--color-border-tertiary)" stroke-width="0.5" stroke-dasharray="5 3"/>
+                          <line x1="160" y1="160" x2="160" y2="270" stroke="var(--color-border-secondary)" stroke-width="0.5"/>
+                          <line x1="10" y1="220" x2="100" y2="220" stroke="var(--color-border-secondary)" stroke-width="0.5"/>
+                          <path d="M10 270 Q25 270 25 255" fill="none" stroke="var(--color-border-secondary)" stroke-width="0.8"/>
+                          <path d="M160 270 Q160 255 175 255" fill="none" stroke="var(--color-border-secondary)" stroke-width="0.8"/>
+                          <text class="ts" x="85" y="90" text-anchor="middle" dominant-baseline="central" style="fill:var(--color-text-tertiary);font-size:10px">홀</text>
+                          <text class="ts" x="250" y="90" text-anchor="middle" dominant-baseline="central" style="fill:var(--color-text-tertiary);font-size:10px">룸A</text>
+                          <text class="ts" x="60" y="190" text-anchor="middle" dominant-baseline="central" style="fill:var(--color-text-tertiary);font-size:10px">주방</text>
+                          <text class="ts" x="230" y="205" text-anchor="middle" dominant-baseline="central" style="fill:var(--color-text-tertiary);font-size:10px">창고</text>
+                          <text class="ts" x="50" y="245" text-anchor="middle" dominant-baseline="central" style="fill:var(--color-text-tertiary);font-size:10px">화장실</text>
+                          <g class="c-purple"><rect x="14" y="14" width="36" height="22" rx="4" stroke-width="0.5"/><text class="th" x="32" y="25" text-anchor="middle" dominant-baseline="central" style="font-size:10px">1H</text></g>
+                          <g class="c-teal"><rect x="55" y="40" width="36" height="22" rx="4" stroke-width="0.5"/><text class="th" x="73" y="51" text-anchor="middle" dominant-baseline="central" style="font-size:10px">1C</text></g>
+                          <text class="ts" x="94" y="51" dominant-baseline="central" style="font-size:9px;fill:#0F6E56">4way</text>
+                          <g class="c-teal"><rect x="140" y="40" width="36" height="22" rx="4" stroke-width="0.5"/><text class="th" x="158" y="51" text-anchor="middle" dominant-baseline="central" style="font-size:10px">2C</text></g>
+                          <text class="ts" x="179" y="51" dominant-baseline="central" style="font-size:9px;fill:#0F6E56">4way</text>
+                          <g class="c-teal"><rect x="210" y="40" width="36" height="22" rx="4" stroke-width="0.5"/><text class="th" x="228" y="51" text-anchor="middle" dominant-baseline="central" style="font-size:10px">3C</text></g>
+                          <text class="ts" x="249" y="51" dominant-baseline="central" style="font-size:9px;fill:#0F6E56">2way</text>
+                          <g class="c-teal"><rect x="55" y="168" width="36" height="22" rx="4" stroke-width="0.5"/><text class="th" x="73" y="179" text-anchor="middle" dominant-baseline="central" style="font-size:10px">4C</text></g>
+                          <text class="ts" x="94" y="179" dominant-baseline="central" style="font-size:9px;fill:#0F6E56">스탠드</text>
+                          <g class="c-blue"><rect x="55" y="14" width="36" height="22" rx="4" stroke-width="0.5"/><text class="th" x="73" y="25" text-anchor="middle" dominant-baseline="central" style="font-size:10px">1S</text></g>
+                          <g class="c-blue"><rect x="140" y="14" width="36" height="22" rx="4" stroke-width="0.5"/><text class="th" x="158" y="25" text-anchor="middle" dominant-baseline="central" style="font-size:10px">2S</text></g>
+                          <g class="c-blue"><rect x="210" y="14" width="36" height="22" rx="4" stroke-width="0.5"/><text class="th" x="228" y="25" text-anchor="middle" dominant-baseline="central" style="font-size:10px">3S</text></g>
+                          <g class="c-blue"><rect x="55" y="193" width="36" height="22" rx="4" stroke-width="0.5"/><text class="th" x="73" y="204" text-anchor="middle" dominant-baseline="central" style="font-size:10px">4S</text></g>
+                          <g class="c-amber"><circle cx="285" cy="170" r="13" stroke-width="0.5"/><text class="th" x="285" y="170" text-anchor="middle" dominant-baseline="central" style="font-size:9px">1A</text></g>
+                          <circle cx="32" cy="25" r="8" fill="none" stroke="#534AB7" stroke-width="1" stroke-dasharray="2 2"/>
+                          <text style="font-size:8px;fill:#534AB7" x="14" y="14" dominant-baseline="central">N</text>
+                        </svg>
+                      </div>
+                      <div>
+                        <div style="padding:6px 10px;background:var(--color-background-secondary);border-bottom:0.5px solid var(--color-border-tertiary);display:flex;align-items:center;justify-content:space-between">
+                          <span style="font-size:11px;font-weight:500;color:var(--color-text-primary)">2F</span>
+                          <span style="font-size:10px;color:#534AB7;font-weight:500">5C~7C ← 이어서</span>
+                        </div>
+                        <svg width="100%" viewBox="0 0 320 280" role="img">
+                          <title>2F 도면 예시</title><desc>2층 도면 — 번호 이어서 증가</desc>
+                          <defs>
+                            <pattern id="fp-h2" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+                              <line x1="0" y1="0" x2="0" y2="5" stroke="var(--color-border-secondary)" stroke-width="0.8"/>
+                            </pattern>
+                          </defs>
+                          <rect x="10" y="10" width="300" height="260" rx="3" fill="none" stroke="var(--color-border-secondary)" stroke-width="0.5"/>
+                          <line x1="10" y1="170" x2="200" y2="170" stroke="var(--color-border-secondary)" stroke-width="0.5"/>
+                          <line x1="200" y1="10" x2="200" y2="270" stroke="var(--color-border-secondary)" stroke-width="0.5"/>
+                          <line x1="10" y1="220" x2="130" y2="220" stroke="var(--color-border-secondary)" stroke-width="0.5"/>
+                          <line x1="130" y1="170" x2="130" y2="270" stroke="var(--color-border-secondary)" stroke-width="0.5"/>
+                          <path d="M200 270 Q200 255 215 255" fill="none" stroke="var(--color-border-secondary)" stroke-width="0.8"/>
+                          <text class="ts" x="105" y="90" text-anchor="middle" dominant-baseline="central" style="fill:var(--color-text-tertiary);font-size:10px">홀</text>
+                          <text class="ts" x="255" y="90" text-anchor="middle" dominant-baseline="central" style="fill:var(--color-text-tertiary);font-size:10px">룸B</text>
+                          <text class="ts" x="65" y="195" text-anchor="middle" dominant-baseline="central" style="fill:var(--color-text-tertiary);font-size:10px">주방</text>
+                          <text class="ts" x="65" y="248" text-anchor="middle" dominant-baseline="central" style="fill:var(--color-text-tertiary);font-size:10px">화장실</text>
+                          <text class="ts" x="165" y="220" text-anchor="middle" dominant-baseline="central" style="fill:var(--color-text-tertiary);font-size:10px">계단</text>
+                          <rect x="138" y="178" width="54" height="84" fill="url(#fp-h2)" stroke="var(--color-border-secondary)" stroke-width="0.5"/>
+                          <g class="c-purple"><rect x="14" y="14" width="36" height="22" rx="4" stroke-width="0.5"/><text class="th" x="32" y="25" text-anchor="middle" dominant-baseline="central" style="font-size:10px">2H</text></g>
+                          <g class="c-teal"><rect x="55" y="40" width="36" height="22" rx="4" stroke-width="0.5"/><text class="th" x="73" y="51" text-anchor="middle" dominant-baseline="central" style="font-size:10px">5C</text></g>
+                          <text class="ts" x="94" y="51" dominant-baseline="central" style="font-size:9px;fill:#0F6E56">4way</text>
+                          <g class="c-teal"><rect x="140" y="40" width="36" height="22" rx="4" stroke-width="0.5"/><text class="th" x="158" y="51" text-anchor="middle" dominant-baseline="central" style="font-size:10px">6C</text></g>
+                          <text class="ts" x="179" y="51" dominant-baseline="central" style="font-size:9px;fill:#0F6E56">1way</text>
+                          <g class="c-teal"><rect x="215" y="40" width="36" height="22" rx="4" stroke-width="0.5"/><text class="th" x="233" y="51" text-anchor="middle" dominant-baseline="central" style="font-size:10px">7C</text></g>
+                          <text class="ts" x="254" y="51" dominant-baseline="central" style="font-size:9px;fill:#0F6E56">360형</text>
+                          <g class="c-blue"><rect x="55" y="14" width="36" height="22" rx="4" stroke-width="0.5"/><text class="th" x="73" y="25" text-anchor="middle" dominant-baseline="central" style="font-size:10px">5S</text></g>
+                          <g class="c-blue"><rect x="140" y="14" width="36" height="22" rx="4" stroke-width="0.5"/><text class="th" x="158" y="25" text-anchor="middle" dominant-baseline="central" style="font-size:10px">6S</text></g>
+                          <g class="c-blue"><rect x="215" y="14" width="36" height="22" rx="4" stroke-width="0.5"/><text class="th" x="233" y="25" text-anchor="middle" dominant-baseline="central" style="font-size:10px">7S</text></g>
+                          <g class="c-amber"><circle cx="285" cy="170" r="13" stroke-width="0.5"/><text class="th" x="285" y="170" text-anchor="middle" dominant-baseline="central" style="font-size:9px">2A</text></g>
+                          <circle cx="32" cy="25" r="8" fill="none" stroke="#534AB7" stroke-width="1" stroke-dasharray="2 2"/>
+                          <text style="font-size:8px;fill:#534AB7" x="14" y="14" dominant-baseline="central">N</text>
+                        </svg>
+                      </div>
+                    </div>
+                    <div style="display:flex;flex-wrap:wrap;gap:5px;padding:8px 10px;border-top:0.5px solid var(--color-border-tertiary);background:var(--color-background-secondary)">
+                      <div style="display:inline-flex;align-items:center;gap:4px;padding:2px 9px;border-radius:8px;font-size:11px;font-weight:500;border:0.5px solid #AFA9EC;background:#EEEDFE;color:#3C3489">H 허브</div>
+                      <div style="display:inline-flex;align-items:center;gap:4px;padding:2px 9px;border-radius:8px;font-size:11px;font-weight:500;border:0.5px solid #5DCAA5;background:#E1F5EE;color:#085041">C 컨트롤러</div>
+                      <div style="display:inline-flex;align-items:center;gap:4px;padding:2px 9px;border-radius:8px;font-size:11px;font-weight:500;border:0.5px solid #85B7EB;background:#E6F1FB;color:#0C447C">S 센서</div>
+                      <div style="display:inline-flex;align-items:center;gap:4px;padding:2px 9px;border-radius:8px;font-size:11px;font-weight:500;border:0.5px solid #EF9F27;background:#FAEEDA;color:#633806">A 공유기</div>
+                    </div>
+                  </div>
+                  <div class="warn" style="margin-bottom:14px">⚠ 번호는 층이 바뀌어도 이어서 증가합니다. 1층 마지막 컨트롤러가 4C라면 2층 첫 번째는 5C부터 시작합니다. 허브도 1층 1H → 2층 2H로 이어집니다.</div>
+
+                  <span class="ph">도면 등록 방법</span>
+                  <ul>
+                    <li>파트너스앱 [장소 보기]에서 오른쪽 상단 [도면] 버튼을 누릅니다.
+                      <ul>
+                        <li>1. [+]를 누른 후 카메라 표시를 눌러 도면을 등록합니다.</li>
+                        <li>2. 도면은 층별로 1개씩만 등록 가능하며, 모든 층마다 빠짐없이 등록합니다.</li>
+                      </ul>
+                    </li>
+                  </ul>
+                  <div class="att">📎 도면 등록 사진</div>
+                  <div class="grid">
+                    <div class="media"><span class="badge">사진</span><div class="placeholder"><span class="icon">🖼</span>assets/floor-reg-1.jpg</div></div>
+                    <div class="media"><span class="badge">사진</span><div class="placeholder"><span class="icon">🖼</span>assets/floor-reg-2.jpg</div></div>
+                    <div class="media"><span class="badge">사진</span><div class="placeholder"><span class="icon">🖼</span>assets/floor-reg-3.jpg</div></div>
+                  </div>
+
+                  <span class="ph">기기 표기 방법</span>
+                  <ul>
+                    <li><strong>허브</strong> — 번호 형식: [순번+H] (예: 1H → 2H → 3H)
+                      <ul>
+                        <li>1. 층이 바뀌어도 번호는 이어서 증가합니다.</li>
+                        <li>2. 허브 MAC 주소 12자리를 함께 기재합니다.</li>
+                      </ul>
+                    </li>
+                    <li><strong>공유기</strong> — 번호 형식: [층+알파벳] (예: 1층 2대 → 1A, 1B / 2층 1대 → 2A)</li>
+                    <li><strong>컨트롤러·센서</strong> — 번호 형식: [순번+C] / [순번+S] (예: 1C, 2C / 1S, 2S)
+                      <ul>
+                        <li>1. 층이 바뀌어도 번호는 이어서 증가합니다.</li>
+                        <li>2. 고객이 주로 사용하는 에어컨에 앞번호를 부여합니다.</li>
+                        <li>3. 사용 빈도가 낮은 기기는 후순위로 배정합니다.</li>
+                        <li>4. MAC 주소 12자리를 모두 기재하고, MAC 주소 옆 칸에 냉난방기 종류를 기재합니다. (예: 1way 스탠드 / 4way 천장형)</li>
+                      </ul>
+                    </li>
+                  </ul>
+
+                  <span class="ph">도면 작성 규칙</span>
+                  <ul>
+                    <li>1. 중요도 순으로 번호를 부여합니다. 고객이 주로 사용하는 에어컨에 앞번호, 사용 빈도가 낮거나 비상주 공간의 기기는 끝번호로 부여합니다.</li>
+                    <li>2. 파트너스 웹 등록 시, 반드시 <strong>[도면 기입 번호] + [공간명(컨트롤러명)]</strong> 조합으로 등록합니다.</li>
+                    <li>3. 복잡한 명칭 대신 해당 기기의 번호만 명확히 기입합니다.</li>
+                  </ul>
+
+                  <span class="ph">도면 작성 주의사항</span>
+                  <ul>
+                    <li>1. 냉난방기 형태를 기재합니다. 실제 현장과 흡사한 도면 작성을 위해 에어컨 형태를 표기합니다. (예: 1way, 4way, 360형)</li>
+                    <li>2. 기둥, 장애물 등이 있을 경우 도면에 함께 표기합니다.</li>
+                    <li>3. 방위(방향)를 전 층 동일한 기준으로 통일합니다.
+                      <ul>
+                        <li>단층 매장: 출입문 기준으로 방향을 설정합니다.</li>
+                        <li>복층 매장: 계단 기준으로 방향을 설정합니다.</li>
+                      </ul>
+                    </li>
+                  </ul>
+                  <div class="warn">⚠ 층별 기준을 혼용하지 않습니다. 예를 들어 1층은 출입문 기준, 2층은 계단 입구 기준으로 각각 다르게 설정하면 안 됩니다. 전 층 동일한 기준을 사용합니다.</div>
+                  <div class="att">📎 도면 작성 참고 사진</div>
+                  <div class="grid">
+                    <div class="media"><span class="badge">사진</span><div class="placeholder"><span class="icon">🖼</span>assets/floor-ex-1.jpg</div></div>
+                    <div class="media"><span class="badge">사진</span><div class="placeholder"><span class="icon">🖼</span>assets/floor-ex-2.jpg</div></div>
+                    <div class="media"><span class="badge">사진</span><div class="placeholder"><span class="icon">🖼</span>assets/floor-ex-3.jpg</div></div>
+                  </div>
+
+                </div>
+              </div>
+
+              <!-- 7. 도면 작성 및 등록 끝 → 설치 작업 accordion 종료 -->
+            </div><!-- end accordion 설치 작업 -->
+
+          </div><!-- end flow -->
+        </div><!-- end lane p -->
+      </div><!-- end lanes 설치당일 -->
+
+      <!-- ===== 검증 ===== -->
+      <div class="phase"><span>검증</span></div>
+      <div class="lanes">
+        <div class="lane s">
+          <div class="flow">
+            <div class="card exp s no-detail" id="c7">
+              <button class="card-head" style="cursor:default" onclick="return false">
+                <div class="card-title">
+                  <h3>설치 검증</h3>
+                  <div class="sub">카카오톡 채널 통해 검증</div>
+                </div>
+              </button>
+              <div class="card-body">
+                <span class="ph">절차 가이드</span>
+                <ul>
+                  <li>협력사 측에서 올린 사진 및 데이터를 기반으로 현장의 무선 통신 수신 강도, 장비 작동 여부를 원격 모니터링합니다.</li>
+                  <li>이상이 발견되지 않으면 카카오톡 채널 상담톡을 통해 최종 '검증 승인 완료'를 통보합니다.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="lane p">
+          <div class="flow">
+            <div class="card exp p" id="stepVerify">
+              <button class="card-head" onclick="selectStep('stepVerify')">
+                <div class="card-title">
+                  <h3>설치 검증 요청</h3>
+                  <div class="sub">씨드앤 크루 카카오톡 채널</div>
+                </div>
+              </button>
+              <div class="card-body">
+                <span class="ph">절차 가이드</span>
+                <ul>
+                  <li>씨드앤의 "씨드앤 크루" 카카오톡 채널로 설치 현장을 검증 받습니다.</li>
+                </ul>
+                <div class="warn">⚠ 검증 완료 전 철수하지 마세요. 씨드앤이 문제 없음을 확인한 후 다음 단계로 진행합니다.</div>
+                <div class="att">📎 첨부 자료</div>
+                <div class="grid">
+                  <div class="media"><span class="badge">사진</span><div class="placeholder"><span class="icon">🖼</span>assets/done-1.jpg</div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="handoff"><i>↕</i> 검증 요청 / 검증 완료</div>
+
+      <!-- ===== 고객 안내 ===== -->
+      <div class="phase"><span>고객 안내</span></div>
+      <div class="lanes">
+        <div class="lane s empty"></div>
+        <div class="lane p">
+          <div class="flow">
+            <div class="card exp p" id="step3">
+              <button class="card-head" onclick="selectStep('step3')">
+                <div class="card-title">
+                  <h3>계정 생성</h3>
+                  <div class="sub">매장 계정 생성 및 배정</div>
+                </div>
+              </button>
+              <div class="card-body">
+                <span class="ph">신규 계정 생성</span>
+                <ul>
+                  <li>파트너스앱에서 설치한 매장의 [장소 보기]로 이동한 후 [계정] 탭을 선택합니다.</li>
+                  <li>[+] 버튼을 누르고 [계정 생성]을 선택합니다.</li>
+                  <li>고객이 사용할 이메일 주소와 비밀번호를 입력합니다. 초기 비밀번호는 통상 <strong>a1234567!</strong> 을 사용합니다.</li>
+                  <li>역할(권한)을 선택합니다.
+                    <ul>
+                      <li><strong>마스터</strong>: 매장당 1명만 부여 가능합니다. 매장 관리자 1명에게 부여합니다.</li>
+                      <li><strong>시니어 / 주니어</strong>: 생성 수 제한 없이 부여 가능합니다.</li>
+                    </ul>
+                  </li>
+                  <li>[생성]을 누르면 계정이 자동으로 해당 매장에 매칭됩니다.</li>
+                </ul>
+                <div class="att">📎 계정 생성 사진</div>
+                <div class="grid">
+                  <div class="media"><span class="badge">사진</span><div class="placeholder"><span class="icon">🖼</span>assets/account-1.jpg</div></div>
+                  <div class="media"><span class="badge">사진</span><div class="placeholder"><span class="icon">🖼</span>assets/account-2.jpg</div></div>
+                  <div class="media"><span class="badge">사진</span><div class="placeholder"><span class="icon">🖼</span>assets/account-3.jpg</div></div>
+                </div>
+                <span class="ph">기존 계정 배정</span>
+                <ul>
+                  <li>이미 생성된 계정을 매칭하려면 [+] 버튼을 누르고 [계정 배정]을 선택합니다.</li>
+                  <li>이름 또는 이메일 주소를 검색하여 해당 항목을 클릭합니다.</li>
+                  <li>역할(권한)을 선택한 후 [적용]하면 해당 매장에 매칭됩니다.</li>
+                </ul>
+                <div class="warn">⚠ 검색 시 일부 텍스트만 입력하면 결과가 나오지 않습니다. 이름 또는 이메일 주소 전체를 정확히 입력해야 검색이 가능합니다.</div>
+                <div class="att">📎 계정 배정 사진</div>
+                <div class="grid">
+                  <div class="media"><span class="badge">사진</span><div class="placeholder"><span class="icon">🖼</span>assets/account-assign-1.jpg</div></div>
+                  <div class="media"><span class="badge">사진</span><div class="placeholder"><span class="icon">🖼</span>assets/account-assign-2.jpg</div></div>
+                  <div class="media"><span class="badge">사진</span><div class="placeholder"><span class="icon">🖼</span>assets/account-assign-3.jpg</div></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card exp p" id="step5">
+              <button class="card-head" onclick="selectStep('step5')">
+                <div class="card-title">
+                  <h3>고객 사용법 안내</h3>
+                  <div class="sub">앱 사용 방법 · 기능 안내</div>
+                </div>
+              </button>
+                <div class="step-body">
+
+                  <span class="ph">앱 사용 방법 안내</span>
+                  <ul>
+                    <li>고객 또는 담당자를 모시고 아래 항목을 순서대로 안내합니다.</li>
+                  </ul>
+
+                  <span class="ph">① 제어 방법</span>
+                  <ul>
+                    <li>앱에서 에어컨을 직접 제어하는 방법을 안내합니다.</li>
+                    <li>고객과 함께 실제 제어 테스트를 진행하여 기기가 정상 작동되는지 확인합니다.</li>
+                  </ul>
+                  <div class="att">📎 첨부 자료</div>
+                  <div class="grid">
+                    <div class="media"><span class="badge">사진</span><div class="placeholder"><span class="icon">🖼</span>assets/guide-ctrl-1.jpg</div></div>
+                    <div class="media"><span class="badge">사진</span><div class="placeholder"><span class="icon">🖼</span>assets/guide-ctrl-2.jpg</div></div>
+                  </div>
+
+                  <span class="ph">② 스케줄 등록 방법</span>
+                  <ul>
+                    <li>앱에서 자동 운영 스케줄을 등록하는 방법을 안내합니다.</li>
+                  </ul>
+                  <div class="att">📎 첨부 자료</div>
+                  <div class="grid">
+                    <div class="media"><span class="badge">사진</span><div class="placeholder"><span class="icon">🖼</span>assets/guide-sched-1.jpg</div></div>
+                    <div class="media"><span class="badge">사진</span><div class="placeholder"><span class="icon">🖼</span>assets/guide-sched-2.jpg</div></div>
+                  </div>
+
+                  <span class="ph">③ 계정 안내</span>
+                  <ul>
+                    <li>생성된 계정 정보를 고객에게 전달합니다.</li>
+                    <li>초기 비밀번호 변경 방법을 안내합니다.</li>
+                  </ul>
+                  <div class="att">📎 첨부 자료</div>
+                  <div class="grid">
+                    <div class="media"><span class="badge">사진</span><div class="placeholder"><span class="icon">🖼</span>assets/guide-account-1.jpg</div></div>
+                  </div>
+
+                  <span class="ph">④ 스마트락 (동기화 기능)</span>
+                  <ul>
+                    <li>고객의 버전(캡스/리프)에 맞는 탭을 선택하여 기능을 설명합니다.</li>
+                    <li>고객의 기능 사용 희망 여부를 확인합니다.</li>
+                  </ul>
+
+                  <div style="border:0.5px solid var(--line);border-radius:12px;overflow:hidden;margin:10px 0 12px">
+                    <div style="display:flex;gap:0;border-bottom:1px solid var(--line)">
+                      <div id="sl-tab-caps" onclick="slTab('caps')" style="flex:1;padding:7px 10px;background:var(--seedn-primary);color:#fff;font-size:11px;font-weight:600;text-align:center;cursor:pointer;border-right:0.5px solid var(--line)">캡스 버전</div>
+                      <div id="sl-tab-leaf" onclick="slTab('leaf')" style="flex:1;padding:7px 10px;background:#f9fafb;color:#6b7280;font-size:11px;font-weight:500;text-align:center;cursor:pointer;border-right:0.5px solid var(--line)">리프 버전</div>
+                      <div id="sl-tab-diff" onclick="slTab('diff')" style="flex:1;padding:7px 10px;background:#f9fafb;color:#6b7280;font-size:11px;font-weight:500;text-align:center;cursor:pointer">버전 비교</div>
+                    </div>
+
+                    <div id="sl-panel-caps" style="padding:12px 14px">
+                      <div style="border:0.5px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:10px;background:#fcfcfc">
+                        <div style="font-size:11px;font-weight:600;color:var(--ink);margin-bottom:4px">스마트락이란?</div>
+                        <div style="font-size:11px;color:var(--muted);line-height:1.6">앱에 표시되는 에어컨 상태와 실제 매장 에어컨 상태를 항상 일치시켜주는 기능입니다.<br>예) 앱에서 OFF → 매장 에어컨도 자동 OFF</div>
+                      </div>
+                      <div style="border:0.5px solid #9FE1CB;border-radius:10px;padding:10px 12px;background:#E1F5EE;margin-bottom:10px">
+                        <div style="font-size:11px;font-weight:600;color:#085041;margin-bottom:3px">장점</div>
+                        <div style="font-size:11px;color:#0F6E56;line-height:1.6">현장에서 패널이나 리모컨으로 제어하더라도 앱 상태로 자동 복귀합니다. 보다 정확하고 편리한 원격 제어가 가능합니다.</div>
+                      </div>
+                      <div style="font-size:11px;font-weight:600;color:#791F1F;margin-bottom:6px">⚠ 주의 사항</div>
+                      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px">
+                        <div style="border:0.5px solid #F09595;border-radius:8px;padding:10px;background:#FCEBEB">
+                          <div style="font-size:11px;font-weight:600;color:#791F1F;margin-bottom:3px">작동 조건</div>
+                          <div style="font-size:10.5px;color:#A32D2D;line-height:1.5">전체 스케줄과 스마트락이 설정되어 있어야 합니다.<br><span style="font-size:9.5px">(스케줄 범위 내에서 가동)</span><br><span style="font-size:9.5px">원격/24h 운영 → 00:00~00:00 설정</span></div>
+                        </div>
+                        <div style="border:0.5px solid #F09595;border-radius:8px;padding:10px;background:#FCEBEB">
+                          <div style="font-size:11px;font-weight:600;color:#791F1F;margin-bottom:3px">리모컨 사용 주의</div>
+                          <div style="font-size:10.5px;color:#A32D2D;line-height:1.5">리모컨으로 제어해도 앱 상태로 되돌아갑니다. 반드시 앱으로 제어해 주세요. 병행 사용 필요 시 사전 문의 바랍니다.</div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div id="sl-panel-leaf" style="padding:12px 14px;display:none">
+                      <div style="border:0.5px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:10px;background:#fcfcfc">
+                        <div style="font-size:11px;font-weight:600;color:var(--ink);margin-bottom:4px">스마트락이란?</div>
+                        <div style="font-size:11px;color:var(--muted);line-height:1.6">앱에 표시되는 에어컨 상태와 실제 매장 에어컨 상태를 항상 일치시켜주는 기능입니다.<br>예) 앱에서 OFF → 매장 에어컨도 자동 OFF</div>
+                      </div>
+                      <div style="border:0.5px solid #9FE1CB;border-radius:10px;padding:10px 12px;background:#E1F5EE;margin-bottom:10px">
+                        <div style="font-size:11px;font-weight:600;color:#085041;margin-bottom:3px">장점</div>
+                        <div style="font-size:11px;color:#0F6E56;line-height:1.6">현장에서 패널이나 리모컨으로 제어하더라도 앱 상태로 자동 복귀합니다. 보다 정확하고 편리한 원격 제어가 가능합니다.</div>
+                      </div>
+                      <div style="font-size:11px;font-weight:600;color:#791F1F;margin-bottom:6px">⚠ 주의 사항</div>
+                      <div style="border:0.5px solid #F09595;border-radius:8px;padding:10px;background:#FCEBEB;margin-bottom:8px">
+                        <div style="font-size:11px;font-weight:600;color:#791F1F;margin-bottom:3px">리모컨 사용 주의</div>
+                        <div style="font-size:10.5px;color:#A32D2D;line-height:1.5">리모컨으로 제어해도 앱 상태로 되돌아갑니다. 반드시 앱으로 제어해 주세요. 병행 사용 필요 시 사전 문의 바랍니다.</div>
+                      </div>
+                    </div>
+
+                    <div id="sl-panel-diff" style="padding:12px 14px;display:none">
+                      <div style="border:0.5px solid var(--line);border-radius:10px;overflow:hidden;margin-bottom:8px">
+                        <div style="display:grid;grid-template-columns:1fr 1fr;border-bottom:0.5px solid var(--line)">
+                          <div style="padding:7px 10px;border-right:0.5px solid var(--line)"><span style="background:#EEEDFE;color:#3C3489;border:0.5px solid #AFA9EC;font-size:10px;font-weight:500;padding:2px 7px;border-radius:99px">캡스</span></div>
+                          <div style="padding:7px 10px"><span style="background:#E1F5EE;color:#085041;border:0.5px solid #5DCAA5;font-size:10px;font-weight:500;padding:2px 7px;border-radius:99px">리프</span></div>
+                        </div>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;border-bottom:0.5px solid var(--line)">
+                          <div style="padding:8px 10px;border-right:0.5px solid var(--line)">
+                            <div style="font-size:10px;color:var(--muted);margin-bottom:3px">스케줄 필수 여부</div>
+                            <div style="font-size:11px;color:#A32D2D;font-weight:500">전체 스케줄 설정 필수<br><span style="font-weight:400;font-size:10px">원격/24h → 00:00~00:00</span></div>
+                          </div>
+                          <div style="padding:8px 10px">
+                            <div style="font-size:10px;color:var(--muted);margin-bottom:3px">스케줄 필수 여부</div>
+                            <div style="font-size:11px;color:#0F6E56;font-weight:500">별도 스케줄 조건 없음</div>
+                          </div>
+                        </div>
+                        <div style="display:grid;grid-template-columns:1fr 1fr">
+                          <div style="padding:8px 10px;border-right:0.5px solid var(--line)">
+                            <div style="font-size:10px;color:var(--muted);margin-bottom:3px">공통 주의사항</div>
+                            <div style="font-size:11px;color:var(--muted)">리모컨 제어 시 앱 상태로 복귀<br>리모컨 병행 필요 시 사전 문의</div>
+                          </div>
+                          <div style="padding:8px 10px">
+                            <div style="font-size:10px;color:var(--muted);margin-bottom:3px">공통 주의사항</div>
+                            <div style="font-size:11px;color:var(--muted)">리모컨 제어 시 앱 상태로 복귀<br>리모컨 병행 필요 시 사전 문의</div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="warn">⚠ 스마트락 기능은 고객 희망 시 씨드앤에 별도 요청해야 활성화됩니다. 기능 설명 후 반드시 사용 여부를 확인하고 씨드앤에 전달하세요.</div>
+
+                  <span class="ph">⑤ AI 기능</span>
+                  <ul>
+                    <li>고객의 버전(캡스/리프)에 맞는 탭을 선택하여 기능을 설명합니다.</li>
+                    <li>고객의 기능 사용 희망 여부를 확인합니다.</li>
+                  </ul>
+
+                  <div style="border:0.5px solid var(--line);border-radius:12px;overflow:hidden;margin:10px 0 12px">
+                    <div style="display:flex;gap:0;border-bottom:1px solid var(--line)">
+                      <div id="ai-tab-caps" onclick="aiTab('caps')" style="flex:1;padding:7px 10px;background:var(--seedn-primary);color:#fff;font-size:11px;font-weight:600;text-align:center;cursor:pointer;border-right:0.5px solid var(--line)">캡스 버전</div>
+                      <div id="ai-tab-leaf" onclick="aiTab('leaf')" style="flex:1;padding:7px 10px;background:#f9fafb;color:#6b7280;font-size:11px;font-weight:500;text-align:center;cursor:pointer;border-right:0.5px solid var(--line)">리프 버전</div>
+                      <div id="ai-tab-diff" onclick="aiTab('diff')" style="flex:1;padding:7px 10px;background:#f9fafb;color:#6b7280;font-size:11px;font-weight:500;text-align:center;cursor:pointer">버전 비교</div>
+                    </div>
+
+                    <div id="ai-panel-caps" style="padding:12px 14px">
+                      <div style="border:0.5px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:10px;background:#fcfcfc">
+                        <div style="font-size:11px;font-weight:600;color:var(--ink);margin-bottom:4px">AI 모드란?</div>
+                        <div style="font-size:11px;color:var(--muted);line-height:1.6">설치된 온습도 센서가 실제 공간의 온도·습도를 측정해 에어컨 설정 온도를 실시간으로 조절합니다.</div>
+                      </div>
+                      <div style="border:0.5px solid #9FE1CB;border-radius:10px;padding:10px 12px;background:#E1F5EE;margin-bottom:10px">
+                        <div style="font-size:11px;font-weight:600;color:#085041;margin-bottom:3px">장점</div>
+                        <div style="font-size:11px;color:#0F6E56;line-height:1.6">공간의 과냉난방, 관리 사각지대를 AI가 자동으로 잡아주어 에너지를 절감할 수 있습니다.</div>
+                      </div>
+                      <div style="font-size:11px;font-weight:600;color:#791F1F;margin-bottom:6px">⚠ 주의 사항</div>
+                      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px">
+                        <div style="border:0.5px solid #F09595;border-radius:8px;padding:10px;background:#FCEBEB">
+                          <div style="font-size:11px;font-weight:600;color:#791F1F;margin-bottom:3px">AI 모드 작동 조건</div>
+                          <div style="font-size:10.5px;color:#A32D2D;line-height:1.5">전체 스케줄과 스마트락이 설정되어 있어야 합니다.<br><span style="font-size:9.5px">(스케줄 범위 내에서 가동)</span></div>
+                        </div>
+                        <div style="border:0.5px solid #F09595;border-radius:8px;padding:10px;background:#FCEBEB">
+                          <div style="font-size:11px;font-weight:600;color:#791F1F;margin-bottom:3px">AI 작동 시점</div>
+                          <div style="font-size:10.5px;color:#A32D2D;line-height:1.5">AI가 냉난방이 필요하다고 판단할 때만 작동합니다. 스케줄 시작 시 바로 켜지지 않을 수 있습니다.</div>
+                        </div>
+                      </div>
+                      <div style="border:0.5px solid #F09595;border-radius:8px;padding:10px;background:#FCEBEB">
+                        <div style="font-size:11px;font-weight:600;color:#791F1F;margin-bottom:3px">APP 제어 권고</div>
+                        <div style="font-size:10.5px;color:#A32D2D;line-height:1.5">AI 모드 가동 중 온도 조절이 필요할 경우 반드시 앱을 통해 제어해주세요.<br>앱 제어 패턴을 AI가 학습하여 쾌적한 환경을 제공합니다.<br><span style="font-size:9.5px">※ AI 판단에 따라 설정이 원복될 수 있습니다.</span></div>
+                      </div>
+                    </div>
+
+                    <div id="ai-panel-leaf" style="padding:12px 14px;display:none">
+                      <div style="border:0.5px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:10px;background:#fcfcfc">
+                        <div style="font-size:11px;font-weight:600;color:var(--ink);margin-bottom:4px">AI 모드란?</div>
+                        <div style="font-size:11px;color:var(--muted);line-height:1.6">설치된 온습도 센서가 실제 공간의 온도·습도를 측정해 에어컨 설정 온도를 실시간으로 조절합니다.</div>
+                      </div>
+                      <div style="border:0.5px solid #9FE1CB;border-radius:10px;padding:10px 12px;background:#E1F5EE;margin-bottom:10px">
+                        <div style="font-size:11px;font-weight:600;color:#085041;margin-bottom:3px">장점</div>
+                        <div style="font-size:11px;color:#0F6E56;line-height:1.6">공간의 과냉난방, 관리 사각지대를 AI가 자동으로 잡아주어 에너지를 절감할 수 있습니다.</div>
+                      </div>
+                      <div style="font-size:11px;font-weight:600;color:#791F1F;margin-bottom:6px">⚠ 주의 사항</div>
+                      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px">
+                        <div style="border:0.5px solid #F09595;border-radius:8px;padding:10px;background:#FCEBEB">
+                          <div style="font-size:11px;font-weight:600;color:#791F1F;margin-bottom:3px">AI 모드 작동 조건</div>
+                          <div style="font-size:10.5px;color:#A32D2D;line-height:1.5">스마트락이 설정되어 있어야 합니다.</div>
+                        </div>
+                        <div style="border:0.5px solid #F09595;border-radius:8px;padding:10px;background:#FCEBEB">
+                          <div style="font-size:11px;font-weight:600;color:#791F1F;margin-bottom:3px">AI 작동 시점</div>
+                          <div style="font-size:10.5px;color:#A32D2D;line-height:1.5">켜져 있는 에어컨에 한해서 AI가 알고리즘 판단하에 온도 관리를 합니다.</div>
+                        </div>
+                      </div>
+                      <div style="border:0.5px solid #F09595;border-radius:8px;padding:10px;background:#FCEBEB">
+                        <div style="font-size:11px;font-weight:600;color:#791F1F;margin-bottom:3px">APP 제어 권고</div>
+                        <div style="font-size:10.5px;color:#A32D2D;line-height:1.5">AI 모드 가동 중 온도 조절이 필요할 경우 반드시 앱을 통해 제어해주세요.<br><span style="font-weight:600">원하시는 온도로 조절 시 앱에서 제어하면 즉시 반영됩니다.</span><br>앱 제어 패턴을 AI가 학습하여 쾌적한 환경을 제공합니다.<br><span style="font-size:9.5px">※ AI 판단에 따라 설정이 원복될 수 있습니다.</span></div>
+                      </div>
+                    </div>
+
+                    <div id="ai-panel-diff" style="padding:12px 14px;display:none">
+                      <div style="border:0.5px solid var(--line);border-radius:10px;overflow:hidden;margin-bottom:8px">
+                        <div style="display:grid;grid-template-columns:1fr 1fr;border-bottom:0.5px solid var(--line)">
+                          <div style="padding:7px 10px;border-right:0.5px solid var(--line)"><span style="background:#EEEDFE;color:#3C3489;border:0.5px solid #AFA9EC;font-size:10px;font-weight:500;padding:2px 7px;border-radius:99px">캡스</span></div>
+                          <div style="padding:7px 10px"><span style="background:#E1F5EE;color:#085041;border:0.5px solid #5DCAA5;font-size:10px;font-weight:500;padding:2px 7px;border-radius:99px">리프</span></div>
+                        </div>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;border-bottom:0.5px solid var(--line)">
+                          <div style="padding:8px 10px;border-right:0.5px solid var(--line)">
+                            <div style="font-size:10px;color:var(--muted);margin-bottom:3px">AI 모드 작동 조건</div>
+                            <div style="font-size:11px;color:#A32D2D;font-weight:500">전체 스케줄 + 스마트락 필수</div>
+                            <div style="font-size:10px;color:#A32D2D">스케줄 범위 내 가동</div>
+                          </div>
+                          <div style="padding:8px 10px">
+                            <div style="font-size:10px;color:var(--muted);margin-bottom:3px">AI 모드 작동 조건</div>
+                            <div style="font-size:11px;color:#0F6E56;font-weight:500">스마트락 설정 필수</div>
+                          </div>
+                        </div>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;border-bottom:0.5px solid var(--line)">
+                          <div style="padding:8px 10px;border-right:0.5px solid var(--line)">
+                            <div style="font-size:10px;color:var(--muted);margin-bottom:3px">AI 작동 시점</div>
+                            <div style="font-size:11px;color:var(--muted)">냉난방 필요 판단 시 작동<br>스케줄 시작 시 바로 안 켜질 수 있음</div>
+                          </div>
+                          <div style="padding:8px 10px">
+                            <div style="font-size:10px;color:var(--muted);margin-bottom:3px">AI 작동 시점</div>
+                            <div style="font-size:11px;color:var(--muted)">켜진 에어컨 대상 알고리즘 판단</div>
+                          </div>
+                        </div>
+                        <div style="display:grid;grid-template-columns:1fr 1fr">
+                          <div style="padding:8px 10px;border-right:0.5px solid var(--line)">
+                            <div style="font-size:10px;color:var(--muted);margin-bottom:3px">공통 사항</div>
+                            <div style="font-size:11px;color:var(--muted)">과냉난방 방지 · 에너지 절감<br>반드시 앱으로 온도 제어<br>AI 판단 시 설정 원복 가능</div>
+                          </div>
+                          <div style="padding:8px 10px">
+                            <div style="font-size:10px;color:var(--muted);margin-bottom:3px">공통 사항</div>
+                            <div style="font-size:11px;color:var(--muted)">과냉난방 방지 · 에너지 절감<br>반드시 앱으로 온도 제어<br>AI 판단 시 설정 원복 가능</div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="warn">⚠ AI 기능은 고객 희망 시 씨드앤에 별도 요청해야 활성화됩니다. 기능 설명 후 반드시 사용 여부를 확인하고 씨드앤에 전달하세요.</div>
+
+                </div>
+              </div>
+
+          </div><!-- end flow -->
+        </div><!-- end lane p -->
+      </div><!-- end lanes 고객 안내 -->
+
+      <!-- ===== 설치 완료 ===== -->
+      <div class="phase"><span>설치 완료</span></div>
+      <div class="lanes">
+        <div class="lane s empty"></div>
+        <div class="lane p">
+          <div class="flow">
+            <div class="card exp p" id="c8">
+              <button class="card-head" onclick="selectStep('c8')">
+                <div class="card-title">
+                  <h3>철수</h3>
+                  <div class="sub">Task에서 '종료' 클릭</div>
+                </div>
+              </button>
+              <div class="card-body">
+                <span class="ph">절차 가이드</span>
+                <ul>
+                  <li>설치 완료 후 [작업 확인]을 누른 후 우측 상단에 수정 버튼을 클릭합니다.</li>
+                  <li>작업 탭에서 특이사항을 기록한 후 저장합니다.</li>
+                  <li>종료 버튼을 눌러 작업을 최종 마무리합니다.</li>
+                </ul>
+                <div class="att">📎 첨부 자료</div>
+                <div class="grid">
+                  <div class="media"><span class="badge">사진</span><div class="placeholder"><span class="icon">🖼</span>assets/close-1.jpg</div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- RIGHT PANEL: DETAILED STEP VIEWER (STAYS STICKY / ACTS AS BOTTOM SHEET ON MOBILE) -->
+    <div class="detail-panel" id="detail-panel" data-theme="p">
+      <!-- Handle for Mobile Bottom Sheet -->
+      <div class="bottom-sheet-handle-container" onclick="closeBottomSheet()">
+        <div class="bottom-sheet-handle"></div>
+      </div>
+
+      <div class="detail-header">
+        <div class="detail-step-badge p" id="detail-step-badge">협력사</div>
+        <h2 id="detail-title">단계를 선택해 주세요</h2>
+        <p class="detail-subtitle" id="detail-subtitle">왼쪽 플로우 가이드의 카드를 선택해 상세 프로세스를 진행해 보세요.</p>
+        
+        <div class="step-progress-container" id="step-progress-container" style="display: none;">
+          <div class="step-progress-bar-bg">
+            <div class="step-progress-bar" id="step-progress-bar"></div>
+          </div>
+          <span class="step-progress-text" id="step-progress-text">0 / 0 완료</span>
+        </div>
+      </div>
+
+      <div class="detail-body" id="detail-body">
+        <div class="empty-state">
+          <span class="icon">👈</span>
+          <p>왼쪽 설치 흐름에서 시작 단계를 선택하시면 단계별 확인 리스트와 지침이 이곳에 펼쳐집니다.</p>
+        </div>
+      </div>
+
+      <div class="detail-footer" id="detail-footer" style="display: none;">
+        <button class="btn-nav" id="btn-prev" onclick="navigateStep(-1)">
+          이전 단계
+        </button>
+        <button class="btn-nav primary" id="btn-next" onclick="navigateStep(1)">
+          다음 단계
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<!-- Backdrop Overlay for Mobile Bottom Sheet -->
+<div class="backdrop" id="backdrop" onclick="closeBottomSheet()"></div>
+
+<!-- Full screen Lightbox Media Viewer -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <div class="lightbox-content" onclick="event.stopPropagation()">
+    <button class="lightbox-close" onclick="closeLightbox()">&times;</button>
+    <div id="lightbox-media-container"></div>
+  </div>
+</div>
+
+<script>
+  // Logical order of installation steps
+  const STEP_ORDER = [
+    'c1', 'c2', 'c3', 'c5',
+    'step0', 'step0b', 'step0d', 'step0c', 'stepDevReg', 'step1', 'step4',
+    'stepVerify', 'step3', 'step5', 'c8'
+  ];
+
+  let currentStepId = null;
+  let checklistStates = {};
+
+  // Load status from local storage
+  function loadStates() {
+    const saved = localStorage.getItem('seedn_install_flow_v3');
+    if (saved) {
+      try {
+        checklistStates = JSON.parse(saved);
+      } catch (e) {
+        checklistStates = {};
+      }
+    }
+  }
+
+  // Save status to local storage
+  function saveStates() {
+    localStorage.setItem('seedn_install_flow_v3', JSON.stringify(checklistStates));
+  }
+
+  // Initializing status indicator elements
+  function init() {
+    loadStates();
+
+
+
+    updateOverallProgress();
+
+    // Auto-restore previous active step or select first step
+    const savedActive = localStorage.getItem('seedn_install_active_step');
+    if (savedActive && document.getElementById(savedActive)) {
+      selectStep(savedActive, true);
+    } else {
+      selectStep('c1', true);
+    }
+  }
+
+  // Select a specific step to display details
+  function selectStep(stepId, preventSheetOpenOnMobile = false) {
+    currentStepId = stepId;
+    localStorage.setItem('seedn_install_active_step', stepId);
+
+    // 이전 active 제거
+    document.querySelectorAll('.card, .step').forEach(el => {
+      el.classList.remove('active');
+    });
+
+    const activeCard = document.getElementById(stepId);
+    if (activeCard) {
+      activeCard.classList.add('active');
+    }
+
+    const isSeedn = activeCard ? activeCard.classList.contains('s') : false;
+    const theme = isSeedn ? 's' : 'p';
+
+    const detailPanel = document.getElementById('detail-panel');
+    detailPanel.setAttribute('data-theme', theme);
+
+    if (!activeCard) return;
+
+    // Update Detail Header
+    const badge = document.getElementById('detail-step-badge');
+    badge.innerText = isSeedn ? '씨드앤' : '협력사';
+    badge.className = `detail-step-badge ${theme}`;
+
+    // Strip indicator code when copying heading title
+    const titleElForHeader = activeCard.querySelector('.card-title h3') || activeCard.querySelector('.step-head .t') || activeCard.querySelector('h3, .t');
+    const rawTitle = titleElForHeader ? titleElForHeader.innerText : '';
+    const cleanTitle = rawTitle.replace(/\(완료\)/g, '').replace(/^[0-9]+/, '').trim();
+    const subtitleElement = activeCard.querySelector('.sub');
+    const subtitle = subtitleElement ? subtitleElement.innerText : '';
+
+    document.getElementById('detail-title').innerText = cleanTitle;
+    document.getElementById('detail-subtitle').innerText = subtitle;
+
+    // Get body templates
+    const originalBody = activeCard.querySelector('.card-body, .step-body');
+    const detailBody = document.getElementById('detail-body');
+
+    if (originalBody) {
+      const clonedBody = originalBody.cloneNode(true);
+      clonedBody.style.display = 'block';
+
+      const uls = clonedBody.querySelectorAll('ul');
+      
+      if (!checklistStates[stepId]) {
+        checklistStates[stepId] = [];
+      }
+
+      let chkIndex = 0;
+      uls.forEach(ul => {
+        const lis = ul.querySelectorAll('li');
+        lis.forEach(li => {
+          const innerHTMLText = li.innerHTML;
+          const isChecked = checklistStates[stepId][chkIndex] || false;
+
+          if (checklistStates[stepId][chkIndex] === undefined) {
+            checklistStates[stepId][chkIndex] = false;
+          }
+
+          const uniqueId = `chk-${stepId}-${chkIndex}`;
+          const currentIdx = chkIndex;
+
+          li.innerHTML = `
+            <label class="checkbox-container">
+              <input type="checkbox" id="${uniqueId}" ${isChecked ? 'checked' : ''} onchange="toggleCheckState('${stepId}', ${currentIdx}, this.checked)">
+              <span class="custom-checkbox"></span>
+              <span class="checkbox-text">${innerHTMLText}</span>
+            </label>
+          `;
+          chkIndex++;
+        });
+      });
+
+      // Default single checkmark if no explicit checklist items exist
+      if (chkIndex === 0) {
+        const defaultDiv = document.createElement('div');
+        defaultDiv.className = 'no-checklist-default';
+        const isChecked = checklistStates[stepId][0] || false;
+        
+        if (checklistStates[stepId][0] === undefined) {
+          checklistStates[stepId][0] = false;
+        }
+
+        defaultDiv.innerHTML = `
+          <label class="checkbox-container">
+            <input type="checkbox" id="chk-${stepId}-single" ${isChecked ? 'checked' : ''} onchange="toggleCheckState('${stepId}', 0, this.checked)">
+            <span class="custom-checkbox"></span>
+            <span class="checkbox-text">이 단계의 절차를 확인했으며 완료했습니다.</span>
+          </label>
+        `;
+        clonedBody.appendChild(defaultDiv);
+        chkIndex = 1;
+      }
+
+      detailBody.innerHTML = '';
+      detailBody.appendChild(clonedBody);
+
+      updateStepProgress(stepId, chkIndex);
+      setupMediaClickHandlers(detailBody);
+      setupInlineTabs(detailBody);
+    } else {
+      // Fallback
+      detailBody.innerHTML = `
+        <div class="no-checklist">
+          <p style="margin-bottom: 16px; color: var(--muted);">이 단계는 상세 세부 가이드가 등록되지 않았습니다.</p>
+          <label class="checkbox-container">
+            <input type="checkbox" id="chk-${stepId}-single" ${checklistStates[stepId] && checklistStates[stepId][0] ? 'checked' : ''} onchange="toggleCheckState('${stepId}', 0, this.checked)">
+            <span class="custom-checkbox"></span>
+            <span class="checkbox-text">이 단계를 완료로 표시</span>
+          </label>
+        </div>
+      `;
+      updateStepProgress(stepId, 1);
+    }
+
+    // Enable navigation footer
+    document.getElementById('detail-footer').style.display = 'flex';
+    
+    // Enable/disable navigation buttons
+    const currentIndex = STEP_ORDER.indexOf(stepId);
+    document.getElementById('btn-prev').disabled = (currentIndex === 0);
+    document.getElementById('btn-next').disabled = (currentIndex === STEP_ORDER.length - 1);
+
+    updateOverallProgress();
+  }
+
+  // Handle single checklist checkbox toggle
+  function toggleCheckState(stepId, index, isChecked) {
+    if (!checklistStates[stepId]) {
+      checklistStates[stepId] = [];
+    }
+    checklistStates[stepId][index] = isChecked;
+    saveStates();
+
+    // Re-verify current active step progress
+    const activeCard = document.getElementById(stepId);
+    const originalBody = activeCard.querySelector('.card-body, .step-body');
+    let totalCount = 1;
+    if (originalBody) {
+      const lisCount = originalBody.querySelectorAll('ul li').length;
+      totalCount = lisCount > 0 ? lisCount : 1;
+    }
+
+    updateStepProgress(stepId, totalCount);
+    updateOverallProgress();
+  }
+
+  // Update step progress indicator
+  function updateStepProgress(stepId, totalCount) {
+    const states = checklistStates[stepId] || [];
+    const checkedCount = states.filter(Boolean).length;
+    
+    const progressContainer = document.getElementById('step-progress-container');
+    const progressBar = document.getElementById('step-progress-bar');
+    const progressText = document.getElementById('step-progress-text');
+
+    if (totalCount > 0) {
+      progressContainer.style.display = 'flex';
+      const percent = Math.round((checkedCount / totalCount) * 100);
+      progressBar.style.width = `${percent}%`;
+      progressText.innerText = `${checkedCount} / ${totalCount} 완료 (${percent}%)`;
+    } else {
+      progressContainer.style.display = 'none';
+    }
+  }
+
+  // Re-calculate the overall checklist progress
+  // 파란 동그라미를 현재 선택 단계에만 적용하는 공통 함수
+  function updateOverallProgress() {
+    let completedSteps = 0;
+
+    STEP_ORDER.forEach(stepId => {
+      const card = document.getElementById(stepId);
+      if (!card) return;
+
+      const originalBody = card.querySelector('.card-body, .step-body');
+      let isCompleted = false;
+
+      if (originalBody) {
+        // 중첩 li 제외: 직접 ul 아래 li만 카운트 (sub-list 제외)
+        const allLis = Array.from(originalBody.querySelectorAll('ul li')).filter(li => {
+          return !li.closest('ul')?.closest('li');
+        });
+        const lisCount = allLis.length;
+        const states = checklistStates[stepId] || [];
+
+        if (lisCount > 0) {
+          isCompleted = states.length >= lisCount && states.slice(0, lisCount).every(Boolean);
+        } else {
+          isCompleted = (states[0] === true);
+        }
+      } else {
+        isCompleted = (checklistStates[stepId] && checklistStates[stepId][0] === true);
+      }
+
+      updateFlowCardStatus(stepId, isCompleted);
+
+      if (isCompleted) {
+        completedSteps++;
+      }
+    });
+
+    const totalSteps = STEP_ORDER.length;
+    const percent = Math.round((completedSteps / totalSteps) * 100);
+
+    document.getElementById('overall-progress-bar').style.width = `${percent}%`;
+    document.getElementById('overall-progress-text').innerText = `${percent}% (${completedSteps} / ${totalSteps} 단계 완료)`;
+  }
+
+  // Visual status classes on flowchart map card
+  function updateFlowCardStatus(stepId, isCompleted) {
+    const card = document.getElementById(stepId);
+    if (!card) return;
+
+    if (isCompleted) {
+      card.classList.add('step-completed');
+      card.classList.remove('step-in-progress');
+    } else {
+      card.classList.remove('step-completed');
+
+      const states = checklistStates[stepId] || [];
+      const hasSomeStarted = states.some(Boolean);
+      if (hasSomeStarted) {
+        card.classList.add('step-in-progress');
+      } else {
+        card.classList.remove('step-in-progress');
+      }
+    }
+  }
+
+  // Navigate back and forth between steps
+  function navigateStep(direction) {
+    if (!currentStepId) return;
+    const currentIndex = STEP_ORDER.indexOf(currentStepId);
+    const nextIndex = currentIndex + direction;
+
+    if (nextIndex >= 0 && nextIndex < STEP_ORDER.length) {
+      selectStep(STEP_ORDER[nextIndex]);
+      
+      // Auto scroll the highlighted step into view in flowchart on desktop
+      if (window.innerWidth >= 768) {
+        const nextCard = document.getElementById(STEP_ORDER[nextIndex]);
+        if (nextCard) {
+          nextCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }
+    }
+  }
+
+  // Reset progress data
+  function resetAllProgress() {
+    const overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:9999;display:flex;align-items:center;justify-content:center;';
+    overlay.innerHTML = `
+      <div style="background:#fff;border-radius:16px;padding:28px 28px 20px;max-width:340px;width:90%;box-shadow:0 8px 32px rgba(0,0,0,0.15);">
+        <div style="font-size:16px;font-weight:700;color:#111;margin-bottom:10px;">진행 초기화</div>
+        <div style="font-size:14px;color:#6b7280;line-height:1.6;margin-bottom:20px;">모든 체크리스트 상태를 처음으로 되돌립니다.<br>이 작업은 되돌릴 수 없습니다.</div>
+        <div style="display:flex;gap:8px;justify-content:flex-end;">
+          <button id="reset-cancel" style="padding:9px 18px;border-radius:8px;border:1px solid #e5e7eb;background:#fff;font-size:13px;font-weight:600;cursor:pointer;color:#374151;">취소</button>
+          <button id="reset-confirm" style="padding:9px 18px;border-radius:8px;border:none;background:#ef4444;font-size:13px;font-weight:600;cursor:pointer;color:#fff;">초기화</button>
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
+
+    document.getElementById('reset-cancel').onclick = () => document.body.removeChild(overlay);
+    document.getElementById('reset-confirm').onclick = () => {
+      document.body.removeChild(overlay);
+
+      checklistStates = {};
+      saveStates();
+      localStorage.removeItem('seedn_install_active_step');
+      currentStepId = null;
+
+      STEP_ORDER.forEach(stepId => {
+        const card = document.getElementById(stepId);
+        if (card) card.classList.remove('step-completed', 'step-in-progress', 'active');
+      });
+
+      const detailBody = document.getElementById('detail-body');
+      if (detailBody) detailBody.innerHTML = '<div class="empty-state"><span class="icon">👈</span><p>왼쪽 설치 흐름에서 시작 단계를 선택하시면 단계별 확인 리스트와 지침이 이곳에 펼쳐집니다.</p></div>';
+
+      const detailTitle = document.getElementById('detail-title');
+      if (detailTitle) detailTitle.innerText = '단계를 선택해 주세요';
+      const detailSubtitle = document.getElementById('detail-subtitle');
+      if (detailSubtitle) detailSubtitle.innerText = '왼쪽 플로우 가이드의 카드를 선택해 상세 프로세스를 진행해 보세요.';
+      const detailFooter = document.getElementById('detail-footer');
+      if (detailFooter) detailFooter.style.display = 'none';
+      const stepProgress = document.getElementById('step-progress-container');
+      if (stepProgress) stepProgress.style.display = 'none';
+
+      document.getElementById('overall-progress-bar').style.width = '0%';
+      document.getElementById('overall-progress-text').innerText = '0% (0 / ' + STEP_ORDER.length + ' 단계 완료)';
+
+      closeBottomSheet();
+    };
+  }
+
+  // Bottom Sheet animations (Mobile)
+  function openBottomSheet() {
+    document.getElementById('detail-panel').classList.add('show-sheet');
+    document.getElementById('backdrop').classList.add('show-sheet');
+    document.body.style.overflow = 'hidden'; // Avoid map scroll while viewing details
+  }
+
+  function closeBottomSheet() {
+    document.getElementById('detail-panel').classList.remove('show-sheet');
+    document.getElementById('backdrop').classList.remove('show-sheet');
+    document.body.style.overflow = '';
+  }
+
+  // Media zoom setup
+  function setupMediaClickHandlers(container) {
+    const mediaElements = container.querySelectorAll('.media');
+    mediaElements.forEach(media => {
+      media.style.cursor = 'pointer';
+      media.addEventListener('click', () => {
+        openLightbox(media);
+      });
+    });
+  }
+
+  function openLightbox(mediaEl) {
+    const lightbox = document.getElementById('lightbox');
+    const container = document.getElementById('lightbox-media-container');
+    container.innerHTML = '';
+
+    const img = mediaEl.querySelector('img');
+    const video = mediaEl.querySelector('video');
+    const placeholder = mediaEl.querySelector('.placeholder');
+
+    if (img) {
+      const clone = img.cloneNode(true);
+      container.appendChild(clone);
+    } else if (video) {
+      const clone = video.cloneNode(true);
+      clone.controls = true;
+      clone.autoplay = true;
+      container.appendChild(clone);
+    } else if (placeholder) {
+      const sim = document.createElement('div');
+      sim.className = 'lightbox-placeholder';
+      sim.innerHTML = `
+        <div class="placeholder-icon">🖼️</div>
+        <div class="placeholder-text">${placeholder.innerText}</div>
+        <div class="placeholder-sub">실제 시공 사진/비디오 자료가 이곳에 확대 출력됩니다.</div>
+      `;
+      container.appendChild(sim);
+    }
+
+    lightbox.classList.add('open');
+  }
+
+  function closeLightbox() {
+    document.getElementById('lightbox').classList.remove('open');
+    document.getElementById('lightbox-media-container').innerHTML = '';
+  }
+
+  function setupInlineTabs(container) {
+    function bindTabGroup(prefix, panelPrefix) {
+      var tabs = container.querySelectorAll('[id^="' + prefix + '"]');
+      tabs.forEach(function(tab) {
+        tab.onclick = function() {
+          var k = tab.id.replace(prefix, '');
+          tabs.forEach(function(t2) {
+            var k2 = t2.id.replace(prefix, '');
+            t2.style.background = k2 === k ? '#5850EC' : '#f9fafb';
+            t2.style.color = k2 === k ? '#fff' : '#6b7280';
+            t2.style.fontWeight = k2 === k ? '600' : '500';
+          });
+          container.querySelectorAll('[id^="' + panelPrefix + '"]').forEach(function(panel) {
+            var pk = panel.id.replace(panelPrefix, '');
+            panel.style.display = pk === k ? 'block' : 'none';
+          });
+        };
+      });
+    }
+    bindTabGroup('sl-tab-', 'sl-panel-');
+    bindTabGroup('ai-tab-', 'ai-panel-');
+  }
+
+  function slTab(t) {}
+  function aiTab(t) {}
+
+  // Setup DOM content loaded
+  window.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
